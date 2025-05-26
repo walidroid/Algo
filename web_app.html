@@ -1,0 +1,3282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithmes Usuels - Interactive</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            overflow-y: auto;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .card {
+            background: white;
+            height: 100%;
+            min-height: 160px; /* Increased minimum height for cards */
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        select, input, button {
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        .pseudo-code {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            font-family: 'Courier New', monospace;
+        }
+
+        .execution-step {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 0.375rem;
+            background: #f8fafc;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        /* Modal animations */
+        .modal-open {
+            overflow: hidden;
+        }
+        
+        body:not(.modal-open) {
+            overflow-y: auto !important;
+        }
+        
+        /* Prevent hover animation on cards in modal */
+        #modal-algorithm-info.card:hover,
+        #modal-interactive-section.card:hover,
+        #modal-results-section.card:hover {
+            transform: none;
+        }
+        
+        /* Custom scrollbar styles */
+        .overflow-y-auto::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-track,
+        html::-webkit-scrollbar-track,
+        body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-thumb,
+        html::-webkit-scrollbar-thumb,
+        body::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 8px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover,
+        html::-webkit-scrollbar-thumb:hover,
+        body::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+        
+        /* Results section scrollbar styles */
+        #execution-steps::-webkit-scrollbar,
+        #modal-execution-steps::-webkit-scrollbar,
+        #result-content::-webkit-scrollbar,
+        #modal-result-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #execution-steps::-webkit-scrollbar-track,
+        #modal-execution-steps::-webkit-scrollbar-track,
+        #result-content::-webkit-scrollbar-track,
+        #modal-result-content::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        #execution-steps::-webkit-scrollbar-thumb,
+        #modal-execution-steps::-webkit-scrollbar-thumb,
+        #result-content::-webkit-scrollbar-thumb,
+        #modal-result-content::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 8px;
+        }
+        
+        #execution-steps::-webkit-scrollbar-thumb:hover,
+        #modal-execution-steps::-webkit-scrollbar-thumb:hover,
+        #result-content::-webkit-scrollbar-thumb:hover,
+        #modal-result-content::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+        
+        /* Fix for scrolling issues */
+        #execution-steps, #modal-execution-steps {
+            overflow-y: auto !important;
+            max-height: 400px !important;
+            display: block !important;
+            position: relative !important;
+            z-index: 10;
+        }
+        
+        /* Ensure full page is scrollable */
+        main.container {
+            overflow: visible;
+            height: auto;
+        }
+        
+        /* Search animation */
+        @keyframes highlight {
+            0% { background-color: rgba(59, 130, 246, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        .highlight-animation {
+            animation: highlight 1.5s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto p-6">
+            <h1 class="text-4xl font-bold mb-2">Algorithmes Usuels</h1>
+            <p class="text-xl opacity-90">Application interactive pour visualiser et tester les algorithmes</p>
+        </div>
+    </header>
+
+    <!-- Modal overlay -->
+    <div id="algorithm-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center transition-opacity duration-300 opacity-0">
+        <div class="bg-white rounded-xl shadow-2xl w-11/12 max-w-6xl max-h-screen sm:max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 id="modal-title" class="text-2xl font-bold text-gray-800"></h2>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-800 focus:outline-none p-2 rounded-full hover:bg-gray-100 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div id="modal-algorithm-info" class="card p-6 overflow-y-auto max-h-[50vh] lg:max-h-[55vh]"></div>
+                    <div id="modal-interactive-section" class="card p-6 overflow-y-auto max-h-[50vh] lg:max-h-[55vh]"></div>
+                </div>
+                <div id="modal-results-section" class="card p-6 mt-6 hidden overflow-y-auto max-h-[50vh]">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Résultats</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div id="modal-result-content" class="bg-blue-50 p-4 rounded-lg text-blue-800 max-h-[400px] overflow-y-auto"></div>
+                        </div>
+                        <div id="modal-step-by-step">
+                            <h3 class="font-bold mb-3 text-gray-800">Étapes d'exécution:</h3>
+                            <div id="modal-execution-steps" class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                                <!-- Steps will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-6">
+        <!-- Algorithm Selection -->
+        <div class="card p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Sélectionnez un algorithme :</h2>
+            
+            <!-- Search input -->
+            <div class="mb-4">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <input id="search-algorithms" type="text" placeholder="Rechercher un algorithme..." 
+                           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div id="search-stats" class="text-sm text-gray-500 mt-2 hidden">
+                    <span id="result-count">0</span> résultat(s) trouvé(s)
+                </div>
+            </div>
+            
+            <div id="filter-tabs" class="flex flex-wrap space-x-2 mb-4">
+                <button class="category-filter active px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition" data-category="tous">Tous</button>
+                <button class="category-filter px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition" data-category="Tri">Tri</button>
+                <button class="category-filter px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition" data-category="Tableau">Tableau</button>
+                <button class="category-filter px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition" data-category="Arithmétique">Arithmétique</button>
+                <button class="category-filter px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition" data-category="Saisie">Saisie</button>
+                <button class="category-filter px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition" data-category="Affichage">Affichage</button>
+                <button class="category-filter px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition" data-category="Vérification">Vérification</button>
+            </div>
+            
+            <div id="algorithm-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Cards will be dynamically generated here -->
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Algorithm Information -->
+            <div id="algorithm-info" class="hidden card p-6">
+                <h2 id="algo-title" class="text-2xl font-bold mb-4 text-gray-800">Algorithme</h2>
+                <div class="pseudo-code p-4 rounded-lg mb-4">
+                    <pre id="algo-pseudocode" class="whitespace-pre-wrap text-sm"></pre>
+                </div>
+                <p id="algo-description" class="text-gray-600 mb-4"></p>
+            </div>
+
+            <!-- Interactive Section -->
+            <div id="interactive-section" class="hidden card p-6">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Section Interactive</h2>
+                
+                <!-- Tableau Input Section -->
+                <div id="tableau-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Taille du tableau:</label>
+                        <input type="number" id="array-size" min="1" max="20" value="5" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <div class="flex space-x-2 mt-2">
+                            <button id="generate-array" 
+                                    class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Générer un tableau
+                            </button>
+                            <button id="random-fill" 
+                                    class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
+                                Valeurs aléatoires
+                            </button>
+                        </div>
+                    </div>
+                    <div id="array-elements" class="hidden space-y-2">
+                        <!-- Array elements will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Number Input Section -->
+                <div id="number-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Entrez un nombre:</label>
+                        <input type="number" id="input-number" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <!-- Two Numbers Input Section -->
+                <div id="two-numbers-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Premier nombre:</label>
+                        <input type="number" id="first-number" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Deuxième nombre:</label>
+                        <input type="number" id="second-number" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <!-- Search Input Section -->
+                <div id="search-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Valeur à rechercher:</label>
+                        <input type="number" id="search-value" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <button id="execute-button" 
+                        class="mt-6 w-full bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    Exécuter
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden card p-6 mt-6">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Résultats</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <div id="result-content" class="bg-blue-50 p-4 rounded-lg text-blue-800 max-h-[400px] overflow-y-auto"></div>
+                </div>
+                <div id="step-by-step">
+                    <h3 class="font-bold mb-3 text-gray-800">Étapes d'exécution:</h3>
+                    <div id="execution-steps" class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                        <!-- Steps will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="gradient-bg text-white p-6 mt-12">
+        <div class="container mx-auto text-center">
+            <p class="opacity-90">© 2025 - Application interactive des Algorithmes Usuels</p>
+        </div>
+    </footer>
+
+    <script>
+        // Algorithmes en format JSON
+        const algorithms = {
+            remplir: {
+                title: "Remplissage d'un tableau",
+                pseudocode: `Procédure remplir (@v:tab;m:entier)
+Début
+    Pour i de 0 à n-1 faire
+        Ecrire ("v[",i,"] = ");
+        Lire (v[i])
+    Fin pour
+fin`,
+                description: "Cette procédure permet de remplir un tableau avec des valeurs saisies par l'utilisateur."
+            },
+            recherche: {
+                title: "Recherche d'un élément dans un tableau",
+                pseudocode: `fonction recherche(T:tab, n,x: entier):booléen
+Début
+    i ← 0, trouve ← Faux
+    tant que (i<n) et (trouve==Faux) faire
+        si v[i]=y alors
+            trouve ← Vrai
+        sinon
+            i ← i+1
+        finsi
+    fin tant que
+    retourner(trouve)
+fin`,
+                description: "Cette fonction recherche un élément x dans un tableau T de n éléments et retourne vrai si l'élément est trouvé, faux sinon."
+            },
+            recherche_sequentielle: {
+                title: "La recherche séquentielle",
+                pseudocode: `fonction recherche(t:tab,x,n:entier):booléen
+début
+      trouve<--faux
+      i<--0
+      répéter
+            Si t[i]=x alors
+                 trouve<--vrai
+            Sinon
+                i<--i+1
+            Fin si
+       jusqu'à(i>n-1 ou trouve=vrai)
+       retourner trouve`,
+                description: "Cette fonction effectue une recherche séquentielle d'une valeur x dans un tableau t de taille n. Elle retourne vrai si x est trouvé, sinon faux."
+            },
+            maximum: {
+                title: "Maximum d'un tableau",
+                pseudocode: `Fonction Maximum(t:tab;n:entier) : entier
+Début
+    Max ← t[0]
+    Pour i de 1 à n-1 faire
+        Si t[i] > Max alors
+            Max ← t[i]
+        Finsi
+    Fin pour
+    Retourner(Max)
+Fin`,
+                description: "Cette fonction retourne la valeur maximale présente dans un tableau d'entiers."
+            },
+            somme: {
+                title: "Somme des éléments d'un tableau",
+                pseudocode: `fonction somme(t:tab;n:entier) : entier
+Debut
+    S ← 0
+    Pour i de 0 à n-1 faire
+        S ← S + t[i]
+    Fin pour
+    Retourner S
+Fin`,
+                description: "Cette fonction calcule la somme de tous les éléments d'un tableau d'entiers."
+            },
+            sommediv: {
+                title: "Somme des diviseurs d'un entier",
+                pseudocode: `fonction sommediv(x:entier) : entier
+Début
+    S ← 0
+    Pour i de 1 à x faire
+        Si x mod i=0 alors
+            S ← S + i
+        FinSi
+    Fin pour
+    Retourner S
+Fin`,
+                description: "Cette fonction calcule la somme de tous les diviseurs d'un nombre entier."
+            },
+            pgcd: {
+                title: "PGCD de deux entiers",
+                pseudocode: `Fonction pgcd(a,b:entier):entier
+début
+    Tantque (a≠b) faire
+        si(a>b)alors
+            a ← a-b
+        sinon
+            b ← b-a
+        finsi
+    fin tantque
+    retourner(a)
+fin`,
+                description: "Cette fonction calcule le plus grand commun diviseur (PGCD) de deux nombres entiers."
+            },
+            ppcm: {
+                title: "PPCM de deux entiers",
+                pseudocode: `Fonction ppcm(a,b:entier):entier
+Début
+    x ← a
+    Tantque (x mod b≠0) faire
+        x ← x+a
+    fin tantque
+    retourner(x)
+fin`,
+                description: "Cette fonction calcule le plus petit commun multiple (PPCM) de deux nombres entiers."
+            },
+            tri_selection: {
+                title: "Tri par sélection",
+                pseudocode: `Procédure TriParSélection (@T : Tab , n : entier)
+Début
+    Pour i de 0 à n-1 faire
+        pmin ← i
+        Pour j de i+1 à n faire
+            Si T[j] < T[pmin] Alors
+                pmin ← j
+            fin si
+        Fin pour
+        Si (t[i] ≠ t[pmin]) alors
+            temp ← T[i]
+            T[i] ← T[pmin]
+            T[pmin] ← temp
+        Fin Si
+    Fin pour
+Fin`,
+                description: "Cette procédure trie un tableau par la méthode de sélection en recherchant le minimum dans la partie non triée et en l'échangeant avec l'élément courant."
+            },
+            tri_insertion: {
+                title: "Tri par insertion",
+                pseudocode: `Procédure TriParInsertion (@T : TAB ; n : entier)
+Début
+    Pour i de 1 à n-1 Faire
+        Tmp ← T[i]
+        j ← i - 1
+        TantQue ( ( T[j] > Tmp ) ET ( j >= 0 ) ) faire
+            T[j+1] ← T[j]
+            j ← j-1
+        FinTantQue
+        T[j+1] ← Tmp
+    Fin Pour
+Fin`,
+                description: "Cette procédure trie un tableau par la méthode d'insertion en insérant chaque élément à la bonne position dans la partie déjà triée."
+            },
+            tri_bulle: {
+                title: "Tri à bulle",
+                pseudocode: `Procédure Tri_A_Bulle (@T : Tab ; n : entier)
+Début
+    Répéter
+        Permut ← Faux
+        Pour i de 0 à n-2 Faire
+            Si T[i] > T[i+1] alors 
+                Aux ← T[i]
+                T[i] ← T[i+1]
+                T[i+1] ← Aux 
+                Permut ← Vrai
+            Fin si
+        Fin Pour
+    Jusqu'à (permut = Faux)
+Fin`,
+                description: "Cette procédure trie un tableau par la méthode de tri à bulle en comparant et échangeant des éléments adjacents jusqu'à ce que le tableau soit trié."
+            },
+            // New algorithms - Input and control
+            saisir_controle: {
+                title: "Saisie avec contrôle",
+                pseudocode: `Procédure saisir (@m:entier)
+Début
+    Répéter
+        Ecrire ("m="); Lire(m)
+    Jusqu'à (m dans[5..10]);
+Fin`,
+                description: "Cette procédure permet de saisir un entier avec une validation pour s'assurer qu'il est compris entre 5 et 10."
+            },
+            remplir_simple: {
+                title: "Remplissage simple",
+                pseudocode: `Procédure remplir (@v:tab; m:entier)
+Début
+    Pour i de 0 à n-1 faire
+        Ecrire ("v[",i,"] = ");
+        Lire (v[i])
+    Fin pour
+fin`,
+                description: "Cette procédure permet de remplir un tableau sans contrôle de saisie."
+            },
+            remplir_positif: {
+                title: "Remplissage positif",
+                pseudocode: `Procédure remplir (@t:tab; n:entier)
+Début
+    Pour i de 1 à n-1 faire
+        Répéter
+            Ecrire ("t[",i,"] = ");
+            Lire (t[i])
+        Jusqu'à (t[i]>0)
+    Fin Pour
+Fin`,
+                description: "Cette procédure remplit un tableau avec des entiers positifs uniquement (>0)."
+            },
+            remplir_aleatoire: {
+                title: "Remplissage aléatoire",
+                pseudocode: `Procédure remplir (@t:tab; n:entier)
+Début
+    Pour i de 1 à n-1 faire
+        t[i] ← aléa(10,90)
+    fin pour
+Fin`,
+                description: "Cette procédure remplit un tableau avec des nombres aléatoires entre 10 et 90."
+            },
+            remplir_lettres: {
+                title: "Remplissage lettres",
+                pseudocode: `Procédure remplir (@t:tab; n:entier)
+Début
+    Pour i de 1 à n-1 faire
+        t[i] ← chr(aléa(ord('A'), ord('Z')))
+    Fin pour
+fin`,
+                description: "Cette procédure remplit un tableau avec des lettres majuscules aléatoires."
+            },
+            // More algorithms will be added in next edit
+            remplir_ordre: {
+                title: "Remplissage en ordre",
+                pseudocode: `Procédure remplir (@t:tab; n:entier)
+Début
+    Ecrire ("T[",0,"] = "); Lire (t[0])
+    Pour i de 1 à n-1 faire
+        Répéter
+            Ecrire ("t[",i,"] = ");
+            Lire (t[i])
+        Jusqu'à (t[i]>t[i-1])
+    Fin Pour
+Fin`,
+                description: "Cette procédure remplit un tableau de façon à ce que chaque élément soit supérieur au précédent."
+            },
+            remplir_deuxchiffres: {
+                title: "Remplissage à deux chiffres",
+                pseudocode: `Procédure remplir (@t:tab; n:entier)
+Début
+    Pour i de 1 à n-1 faire
+        Répéter
+            Ecrire ("t[",i,"] = ");
+            Lire (t[i])
+        Jusqu'à (10<=t[i]<=99)
+    Fin Pour
+Fin`,
+                description: "Cette procédure remplit un tableau avec des entiers à deux chiffres (entre 10 et 99)."
+            },
+            remplir_distinct: {
+                title: "Remplissage distinct",
+                pseudocode: `Procédure remplir (@t:tab; n:entier)
+Début
+    Pour i de 1 à n-1 faire
+        Répéter
+            Ecrire ("t[",i,"] = ");
+            Lire (t[i])
+        Jusqu'à (recherche(t,i,t[i])=faux)
+    Fin Pour
+Fin`,
+                description: "Cette procédure remplit un tableau avec des valeurs distinctes, en vérifiant que chaque nouvelle valeur n'est pas déjà présente."
+            },
+            remplir_lettresonly: {
+                title: "Remplissage lettres uniquement",
+                pseudocode: `Procédure remplir (@t:tab; n:entier)
+Début
+    Pour i de 1 à n-1 faire
+        Répéter
+            Ecrire ("t[",i,"] = ");
+            Lire (t[i])
+        Jusqu'à (verif(t[i])=vrai)
+    Fin Pour
+Fin`,
+                description: "Cette procédure remplit un tableau avec des chaînes contenant uniquement des lettres alphabétiques."
+            },
+            nbocc: {
+                title: "Nombre d'occurrences",
+                pseudocode: `Fonction nbocc(t:tab, n, x:entier):entier
+Début
+    nb ← 0
+    Pour i de 0 à n-1 faire
+        Si t[i]=x alors
+            nb ← nb+1
+        fin si
+    fin pour
+    retourner(nb)
+fin`,
+                description: "Cette fonction compte le nombre d'occurrences d'une valeur x dans un tableau T."
+            },
+            verif_lettres: {
+                title: "Vérification lettres",
+                pseudocode: `fonction verif(ch:chaine):booléen
+Début
+    i ← 0, test ← vrai
+    tant que (i< long(ch))et (test==vrai) faire
+        si ('A'< majus(ch[i])< 'Z') alors
+            i ← i+1
+        sinon
+            test ← Faux
+        finsi
+    fin tantque
+    retourner(test)
+fin`,
+                description: "Cette fonction vérifie si une chaîne ne contient que des lettres alphabétiques."
+            },
+            inverse: {
+                title: "Inverse d'une chaîne",
+                pseudocode: `Fonction inverse(ch:chaine):chaine
+Début
+    ch1 ← ''
+    Pour i de 0 à long(ch)-1 faire
+        ch1 ← ch[i]+ch1
+    Fin pour
+    retourner(ch1)
+fin`,
+                description: "Cette fonction renvoie l'inverse d'une chaîne de caractères."
+            },
+            nbdiv: {
+                title: "Nombre de diviseurs",
+                pseudocode: `Fonction nbdiv(x:entier):entier
+Début
+    nb ← 0
+    Pour i de 1 à x faire
+        Si x mod i=0 alors
+            nb ← nb + 1
+        FinSi
+    Fin pour
+    Retourner nb
+Fin`,
+                description: "Cette fonction calcule le nombre de diviseurs d'un entier x."
+            },
+            sommechiffre: {
+                title: "Somme des chiffres",
+                pseudocode: `Fonction sommechiffre(N:entier):entier
+début
+    S ← 0
+    Répéter
+        S ← S + N MOD 10
+        N ← N DIV 10
+    Jusqu'à N = 0
+    Retourner(S)
+fin`,
+                description: "Cette fonction calcule la somme des chiffres d'un nombre entier."
+            },
+            affichage: {
+                title: "Affichage tableau",
+                pseudocode: `Procédure affichage(v:tab; n:entier)
+Début
+    Pour i de 0 à n-1 faire
+        Ecrire ("V[",i,"] = ",v[i]);
+    Finpour
+fin`,
+                description: "Cette procédure affiche tous les éléments d'un tableau."
+            },
+            affichage_pairs: {
+                title: "Affichage pairs",
+                pseudocode: `Procédure affiche(t:tab; n:entier)
+Début
+    Pour i de 0 à n-1 faire
+        si t[i] mod 2 = 0 alors
+            Ecrire ("T[",i,"] = ",t[i]);
+        finsi
+    Fin pour
+Fin`,
+                description: "Cette procédure affiche uniquement les éléments pairs d'un tableau."
+            },
+            extraire: {
+                title: "Extraire pairs/impairs",
+                pseudocode: `Procédure extraire(t,@TP,@Timp:tab; n,@j,@k:entier)
+Début
+    j ← 0, k ← 0
+    Pour i de 0 à n-1 faire
+        Si(t[i] mod 2 = 0) alors
+            Tp[j] ← t[i],
+            j ← j+1
+        Sinon
+            Timp[k] ← t[i]
+            k ← k+1
+        Finsi
+    Fin pour
+Fin`,
+                description: "Cette procédure extrait à partir d'un tableau T les éléments pairs dans Tp et impairs dans Timp."
+            },
+            insertion: {
+                title: "Insertion élément",
+                pseudocode: `Procédure insertion(@v:tab; n,x,p:entier):
+Début
+    Pour i de n à p+1 (pas= -1) faire 
+        t[i] = t[i-1]
+    fin pour
+    t[p] = x
+fin`,
+                description: "Cette procédure insère un élément x dans un tableau T à une position p."
+            },
+            recherche_dichotomique: {
+                title: "La recherche dichotomique",
+                pseudocode: `Fonction Recherche (T: Tab, n:entier, X: entier) : Booléen\nDébut\n      d←0\n      f←n-1\n      trouve←faux\n      Tant Que (Trouve=faux Et (d ≤ f) Faire\n             Mil← (f+d) div 2\n             Si (T[Mil]=X) Alors\n                     Trouve←Vrai\n             Sinon si (T[Mil] < X) Alors\n                      d←Mil+1\n             Sinon\n                      f←Mil-1\n             FinSi\n      Fin Tant que\n      Retourner Trouve\nFin`,
+                description: "Cette fonction effectue une recherche dichotomique (binaire) d'une valeur X dans un tableau T trié de taille n. Elle retourne vrai si X est trouvé, sinon faux."
+            },
+        };
+
+        // DOM elements
+        const algorithmSelector = document.getElementById('algorithm-selector');
+        const algorithmCards = document.getElementById('algorithm-cards');
+        const algorithmInfo = document.getElementById('algorithm-info');
+        const algoTitle = document.getElementById('algo-title');
+        const algoPseudocode = document.getElementById('algo-pseudocode');
+        const algoDescription = document.getElementById('algo-description');
+        const interactiveSection = document.getElementById('interactive-section');
+        const tableauInput = document.getElementById('tableau-input');
+        const numberInput = document.getElementById('number-input');
+        const twoNumbersInput = document.getElementById('two-numbers-input');
+        const searchInput = document.getElementById('search-input');
+        const arraySize = document.getElementById('array-size');
+        const generateArray = document.getElementById('generate-array');
+        const arrayElements = document.getElementById('array-elements');
+        const executeButton = document.getElementById('execute-button');
+        const resultsSection = document.getElementById('results-section');
+        const resultContent = document.getElementById('result-content');
+        const executionSteps = document.getElementById('execution-steps');
+
+        // Generate algorithm cards
+        function generateAlgorithmCards() {
+            // Clear existing cards
+            algorithmCards.innerHTML = '';
+            
+            // Generate a card for each algorithm
+            Object.entries(algorithms).forEach(([key, algo]) => {
+                const cardType = getAlgoTypeTag(key);
+                const cardColors = getCardColors(cardType);
+                
+                const card = document.createElement('div');
+                // Add algorithm-specific background class and remove bg from cardColors
+                card.className = `card cursor-pointer border ${cardColors.border} rounded-lg hover:shadow-md ${cardColors.hoverBorder} transform hover:-translate-y-1 transition-all duration-200 ${key}-bg`;
+                card.dataset.algo = key;
+                card.dataset.type = cardType;
+                
+                // Create card content
+                card.innerHTML = `
+                    <div class="m-3 flex flex-col h-full">
+                        <h3 class="text-lg font-semibold mb-2 ${cardColors.title}">${algo.title}</h3>
+                        <p class="font-light text-sm ${cardColors.text} line-clamp-2 flex-grow">${algo.description}</p>
+                        <div class="mt-3 text-right">
+                            <span class="text-sm ${cardColors.tagText} font-mono ${cardColors.tagBg} inline-block rounded-full px-2 py-1">${cardType}</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click event
+                card.addEventListener('click', function() {
+                    // Remove active class from all cards
+                    document.querySelectorAll('#algorithm-cards .card').forEach(c => {
+                        const type = c.dataset.type;
+                        const colors = getCardColors(type);
+                        c.classList.remove(colors.activeBorder);
+                        c.style.boxShadow = '';
+                    });
+                    
+                    // Add active class to clicked card
+                    this.classList.add(cardColors.activeBorder);
+                    // Add a glowing effect to the active card
+                    this.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.2)';
+                    
+                    // Open the modal with this algorithm
+                    openAlgorithmModal(this.dataset.algo);
+                });
+                
+                algorithmCards.appendChild(card);
+            });
+        }
+        
+        // Helper function to get algorithm type tag
+        function getAlgoTypeTag(algoKey) {
+            if (['tri_selection', 'tri_insertion', 'tri_bulle'].includes(algoKey)) {
+                return 'Tri';
+            } else if (['recherche', 'maximum', 'somme', 'nbocc', 'inverse','tableau'].includes(algoKey)) {
+                return 'Tableau';
+            } else if (['pgcd', 'ppcm', 'sommediv', 'nbdiv', 'sommechiffre'].includes(algoKey)) {
+                return 'Arithmétique';
+            } else if (['saisir_controle', 'remplir_simple', 'remplir_positif', 'remplir_aleatoire', 
+                       'remplir_lettres', 'remplir_ordre', 'remplir_deuxchiffres', 'remplir_distinct',
+                       'remplir_lettresonly'].includes(algoKey)) {
+                return 'Saisie';
+            } else if (['affichage', 'affichage_pairs', 'extraire', 'insertion'].includes(algoKey)) {
+                return 'Affichage';
+            } else if (['verif_lettres'].includes(algoKey)) {
+                return 'Vérification';
+            } else {
+                return 'Autre';
+            }
+        }
+
+        // Helper function to get card colors based on algorithm type
+        function getCardColors(type) {
+            switch(type) {
+                case 'Tri':
+                    return {
+                        border: 'border-purple-300',
+                        hoverBorder: 'hover:border-purple-500',
+                        activeBorder: 'border-purple-500',
+                        activeBg: 'bg-purple-100',
+                        title: 'text-purple-800',
+                        text: 'text-purple-700',
+                        tagBg: 'bg-purple-100',
+                        tagText: 'text-purple-800'
+                    };
+                case 'Tableau':
+                    return {
+                        border: 'border-blue-300',
+                        hoverBorder: 'hover:border-blue-500',
+                        activeBorder: 'border-blue-500',
+                        activeBg: 'bg-blue-100',
+                        title: 'text-blue-800',
+                        text: 'text-blue-700',
+                        tagBg: 'bg-blue-100',
+                        tagText: 'text-blue-800'
+                    };
+                case 'Arithmétique':
+                    return {
+                        border: 'border-green-300',
+                        hoverBorder: 'hover:border-green-500',
+                        activeBorder: 'border-green-500',
+                        activeBg: 'bg-green-100',
+                        title: 'text-green-800',
+                        text: 'text-green-700',
+                        tagBg: 'bg-green-100',
+                        tagText: 'text-green-800'
+                    };
+                case 'Saisie':
+                    return {
+                        border: 'border-orange-300',
+                        hoverBorder: 'hover:border-orange-500',
+                        activeBorder: 'border-orange-500',
+                        activeBg: 'bg-orange-100',
+                        title: 'text-orange-800',
+                        text: 'text-orange-700',
+                        tagBg: 'bg-orange-100',
+                        tagText: 'text-orange-800'
+                    };
+                case 'Affichage':
+                    return {
+                        border: 'border-red-300',
+                        hoverBorder: 'hover:border-red-500',
+                        activeBorder: 'border-red-500',
+                        activeBg: 'bg-red-100',
+                        title: 'text-red-800',
+                        text: 'text-red-700',
+                        tagBg: 'bg-red-100',
+                        tagText: 'text-red-800'
+                    };
+                case 'Vérification':
+                    return {
+                        border: 'border-indigo-300',
+                        hoverBorder: 'hover:border-indigo-500',
+                        activeBorder: 'border-indigo-500',
+                        activeBg: 'bg-indigo-100',
+                        title: 'text-indigo-800',
+                        text: 'text-indigo-700',
+                        tagBg: 'bg-indigo-100',
+                        tagText: 'text-indigo-800'
+                    };
+                default:
+                    return {
+                        border: 'border-amber-300',
+                        hoverBorder: 'hover:border-amber-500',
+                        activeBorder: 'border-amber-500',
+                        activeBg: 'bg-amber-100',
+                        title: 'text-amber-800',
+                        text: 'text-amber-700',
+                        tagBg: 'bg-amber-100',
+                        tagText: 'text-amber-800'
+                    };
+            }
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            generateArray.addEventListener('click', createArrayInputs);
+            executeButton.addEventListener('click', executeAlgorithm);
+            
+            // Add random fill button if not already added
+            if (!document.getElementById('random-fill')) {
+                const generateArrayDiv = document.querySelector('#generate-array').parentNode;
+                const randomFillButton = document.createElement('button');
+                randomFillButton.id = 'random-fill';
+                randomFillButton.className = 'flex-1 bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2';
+                randomFillButton.textContent = 'Valeurs aléatoires';
+                randomFillButton.addEventListener('click', function() {
+                    createArrayInputs();
+                    fillRandomArray();
+                });
+                generateArrayDiv.appendChild(randomFillButton);
+            }
+
+            // Add search functionality
+            const searchInput = document.getElementById('search-algorithms');
+            const searchStats = document.getElementById('search-stats');
+            const resultCount = document.getElementById('result-count');
+            
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                const cards = document.querySelectorAll('#algorithm-cards .card');
+                let matchCount = 0;
+                
+                // Get current active category with fallback to 'tous'
+                const activeFilter = document.querySelector('.category-filter.active');
+                const activeCategory = activeFilter ? activeFilter.dataset.category : 'tous';
+                
+                cards.forEach(card => {
+                    const algoKey = card.dataset.algo;
+                    const algo = algorithms[algoKey];
+                    const title = algo.title.toLowerCase();
+                    const description = algo.description.toLowerCase();
+                    const cardType = card.dataset.type;
+                    
+                    // Check if card matches both search query and active category filter
+                    const matchesSearch = title.includes(query) || description.includes(query) || algoKey.includes(query);
+                    const matchesCategory = activeCategory === 'tous' || cardType === activeCategory;
+                    
+                    if (matchesSearch && matchesCategory) {
+                        card.classList.remove('hidden');
+                        // Add highlight animation
+                        card.classList.add('highlight-animation');
+                        setTimeout(() => {
+                            card.classList.remove('highlight-animation');
+                        }, 1500);
+                        matchCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+                
+                // Update search stats
+                resultCount.textContent = matchCount;
+                if (query) {
+                    searchStats.classList.remove('hidden');
+                } else {
+                    searchStats.classList.add('hidden');
+                }
+            });
+            
+            // Add category filter functionality
+            const filterButtons = document.querySelectorAll('.category-filter');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.classList.remove('bg-blue-100', 'text-blue-800');
+                        btn.classList.add('bg-gray-100', 'text-gray-800');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    this.classList.remove('bg-gray-100', 'text-gray-800');
+                    this.classList.add('bg-blue-100', 'text-blue-800');
+                    
+                    const category = this.dataset.category;
+                    const cards = document.querySelectorAll('#algorithm-cards .card');
+                    
+                    cards.forEach(card => {
+                        if (category === 'tous' || card.dataset.type === category) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    });
+                    
+                    // Reset search when filter changes
+                    document.getElementById('search-algorithms').value = '';
+                    document.getElementById('search-stats').classList.add('hidden');
+                });
+            });
+        }
+
+        // Functions
+        function showAlgorithmInfo(algoKey) {
+            if (!algoKey || !algorithms[algoKey]) {
+                algorithmInfo.classList.add('hidden');
+                interactiveSection.classList.add('hidden');
+                resultsSection.classList.add('hidden');
+                return;
+            }
+            
+            const algo = algorithms[algoKey];
+            
+            // Update algorithm info with fade effect
+            algorithmInfo.style.opacity = '0';
+            algorithmInfo.classList.remove('hidden');
+            
+            // Update content
+            algoTitle.textContent = algo.title;
+            algoPseudocode.textContent = algo.pseudocode;
+            algoDescription.textContent = algo.description;
+            
+            // Fade in
+            setTimeout(() => {
+                algorithmInfo.style.transition = 'opacity 0.3s ease-in-out';
+                algorithmInfo.style.opacity = '1';
+            }, 0);
+            
+            // Show interactive section with fade effect
+            interactiveSection.style.opacity = '0';
+            interactiveSection.classList.remove('hidden');
+            setupInteractiveSection(algoKey);
+            setTimeout(() => {
+                interactiveSection.style.transition = 'opacity 0.3s ease-in-out';
+                interactiveSection.style.opacity = '1';
+            }, 0);
+            
+            // Hide results
+            resultsSection.classList.add('hidden');
+        }
+
+        function setupInteractiveSection(algoType) {
+            // Hide all input sections first
+            tableauInput.classList.add('hidden');
+            numberInput.classList.add('hidden');
+            twoNumbersInput.classList.add('hidden');
+            searchInput.classList.add('hidden');
+            arrayElements.classList.add('hidden');
+            
+            // Show appropriate inputs based on algorithm type
+            switch(algoType) {
+                // Array inputs
+                case 'remplir':
+                case 'maximum':
+                case 'somme':
+                case 'tri_selection':
+                case 'tri_insertion':
+                case 'tri_bulle':
+                case 'remplir_simple':
+                case 'remplir_positif':
+                case 'remplir_aleatoire':
+                case 'remplir_lettres':
+                case 'remplir_ordre':
+                case 'remplir_deuxchiffres':
+                case 'remplir_distinct':
+                case 'remplir_lettresonly':
+                case 'affichage':
+                case 'affichage_pairs':
+                case 'extraire':
+                    tableauInput.classList.remove('hidden');
+                    break;
+                    
+                // Array with search
+                case 'recherche':
+                case 'nbocc':
+                case 'recherche_sequentielle':
+                case 'recherche_dichotomique':
+                    tableauInput.classList.remove('hidden');
+                    searchInput.classList.remove('hidden');
+                    break;
+                    
+                // Single number input
+                case 'sommediv':
+                case 'nbdiv':
+                case 'sommechiffre':
+                case 'saisir_controle':
+                    numberInput.classList.remove('hidden');
+                    break;
+                    
+                // String input for string operations
+                case 'inverse':
+                case 'verif_lettres':
+                    // Reuse the number input field but change the label
+                    document.querySelector('#number-input label').textContent = "Entrez une chaîne:";
+                    document.getElementById('input-number').type = "text";
+                    numberInput.classList.remove('hidden');
+                    break;
+                    
+                // Two numbers input
+                case 'pgcd':
+                case 'ppcm':
+                    twoNumbersInput.classList.remove('hidden');
+                    break;
+                    
+                // Insertion needs array + position + value
+                case 'insertion':
+                    tableauInput.classList.remove('hidden');
+                    // Add position and value inputs
+                    if (!document.getElementById('position-input')) {
+                        const posValueDiv = document.createElement('div');
+                        posValueDiv.id = 'position-input';
+                        posValueDiv.className = 'hidden space-y-4';
+                        posValueDiv.innerHTML = `
+                            <div class="flex flex-col">
+                                <label class="text-gray-700 mb-2">Position d'insertion:</label>
+                                <input type="number" id="insert-position" min="0" 
+                                       class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-gray-700 mb-2">Valeur à insérer:</label>
+                                <input type="number" id="insert-value" 
+                                       class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        `;
+                        interactiveSection.insertBefore(posValueDiv, document.getElementById('execute-button'));
+                    }
+                    document.getElementById('position-input').classList.remove('hidden');
+                    break;
+            }
+            
+            // Reset string input if we're not using it
+            if (!['inverse', 'verif_lettres'].includes(algoType)) {
+                document.querySelector('#number-input label').textContent = "Entrez un nombre:";
+                document.getElementById('input-number').type = "number";
+            }
+            
+            // Hide insertion inputs if not needed
+            if (algoType !== 'insertion' && document.getElementById('position-input')) {
+                document.getElementById('position-input').classList.add('hidden');
+            }
+        }
+
+        function createArrayInputs() {
+            const size = parseInt(arraySize.value);
+            if (isNaN(size) || size < 1 || size > 20) {
+                alert('Veuillez entrer une taille valide (entre 1 et 20)');
+                return;
+            }
+            
+            arrayElements.innerHTML = '';
+            
+            // Create a horizontal container for all elements
+            const horizontalContainer = document.createElement('div');
+            horizontalContainer.className = 'flex flex-wrap items-center gap-2';
+            arrayElements.appendChild(horizontalContainer);
+            
+            for (let i = 0; i < size; i++) {
+                const div = document.createElement('div');
+                div.className = 'flex-shrink-0 flex items-center';
+                div.innerHTML = `
+                    <label class="w-12 text-gray-700 text-sm">v[${i}]</label>
+                    <input type="number" id="array-element-${i}" 
+                           class="w-16 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                `;
+                horizontalContainer.appendChild(div);
+            }
+            
+            // Add fade-in animation
+            arrayElements.style.opacity = '0';
+            arrayElements.classList.remove('hidden');
+            setTimeout(() => {
+                arrayElements.style.transition = 'opacity 0.3s ease-in-out';
+                arrayElements.style.opacity = '1';
+            }, 0);
+        }
+
+        function getArrayValues() {
+            const size = parseInt(arraySize.value);
+            const array = [];
+            
+            for (let i = 0; i < size; i++) {
+                const element = document.getElementById(`array-element-${i}`);
+                if (element) {
+                    const value = parseInt(element.value);
+                    array.push(isNaN(value) ? 0 : value);
+                }
+            }
+            
+            return array;
+        }
+
+        function executeAlgorithm() {
+            // Find the selected algorithm
+            const selectedCard = document.querySelector('#algorithm-cards .card.border-blue-500');
+            if (!selectedCard) {
+                alert('Veuillez sélectionner un algorithme');
+                return;
+            }
+            
+            const selectedAlgo = selectedCard.dataset.algo;
+            let result = null;
+            let steps = [];
+            
+            switch(selectedAlgo) {
+                // Existing algorithm cases
+                case 'remplir': {
+                    const array = getArrayValues();
+                    result = `Tableau rempli: [${array.join(', ')}]`;
+                    steps.push('Début de la procédure');
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`v[${i}] = ${array[i]}`);
+                    }
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'recherche': {
+                    const array = getArrayValues();
+                    const searchValue = parseInt(document.getElementById('search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction recherche');
+                    steps.push(`i = 0, trouve = Faux`);
+                    
+                    let i = 0;
+                    let trouve = false;
+                    
+                    while (i < array.length && !trouve) {
+                        steps.push(`Vérification si v[${i}] = ${searchValue}`);
+                        if (array[i] === searchValue) {
+                            trouve = true;
+                            steps.push(`v[${i}] = ${searchValue}, donc trouve = Vrai`);
+                        } else {
+                            steps.push(`v[${i}] ≠ ${searchValue}, donc i = i + 1 = ${i + 1}`);
+                            i++;
+                        }
+                    }
+                    
+                    result = trouve ? 
+                        `La valeur ${searchValue} a été trouvée à la position ${i}` : 
+                        `La valeur ${searchValue} n'a pas été trouvée dans le tableau`;
+                    
+                    steps.push(`Résultat: ${trouve ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'recherche_sequentielle': {
+                    const array = getArrayValues();
+                    const searchValue = parseInt(document.getElementById('search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    steps.push('Début de la fonction recherche séquentielle');
+                    let trouve = false;
+                    let i = 0;
+                    steps.push('trouve ← faux');
+                    steps.push('i ← 0');
+                    do {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} == ${searchValue}`);
+                        if (array[i] === searchValue) {
+                            trouve = true;
+                            steps.push('trouve ← vrai');
+                        } else {
+                            steps.push(`i ← i + 1 = ${i + 1}`);
+                            i++;
+                        }
+                    } while (i <= array.length - 1 && !trouve);
+                    result = trouve ?
+                        `La valeur ${searchValue} a été trouvée à la position ${i}` :
+                        `La valeur ${searchValue} n'a pas été trouvée dans le tableau`;
+                    steps.push(`Résultat: ${trouve ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'recherche_dichotomique': {
+                    const array = getArrayValues();
+                    const searchValue = parseInt(document.getElementById('search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    steps.push('Début de la fonction recherche dichotomique');
+                    let d = 0;
+                    let f = array.length - 1;
+                    let trouve = false;
+                    steps.push(`d ← 0, f ← ${array.length - 1}, trouve ← faux`);
+                    while (!trouve && d <= f) {
+                        let mil = Math.floor((d + f) / 2);
+                        steps.push(`Mil ← (d + f) div 2 = (${d} + ${f}) div 2 = ${mil}`);
+                        if (array[mil] === searchValue) {
+                            trouve = true;
+                            steps.push(`T[${mil}] = ${searchValue}, donc trouve ← vrai`);
+                        } else if (array[mil] < searchValue) {
+                            steps.push(`T[${mil}] = ${array[mil]} < ${searchValue}, donc d ← Mil + 1 = ${mil + 1}`);
+                            d = mil + 1;
+                        } else {
+                            steps.push(`T[${mil}] = ${array[mil]} > ${searchValue}, donc f ← Mil - 1 = ${mil - 1}`);
+                            f = mil - 1;
+                        }
+                    }
+                    result = trouve ?
+                        `La valeur ${searchValue} a été trouvée dans le tableau.` :
+                        `La valeur ${searchValue} n'a pas été trouvée dans le tableau.`;
+                    steps.push(`Résultat: ${trouve ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'maximum': {
+                    const array = getArrayValues();
+                    if (array.length === 0) {
+                        alert('Le tableau doit contenir au moins un élément');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction Maximum');
+                    steps.push(`Max = t[0] = ${array[0]}`);
+                    
+                    let max = array[0];
+                    
+                    for (let i = 1; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} > Max = ${max}`);
+                        if (array[i] > max) {
+                            max = array[i];
+                            steps.push(`t[${i}] > Max, donc Max = ${max}`);
+                        } else {
+                            steps.push(`t[${i}] ≤ Max, donc Max reste ${max}`);
+                        }
+                    }
+                    
+                    result = `Le maximum du tableau est: ${max}`;
+                    steps.push(`Retourne Max = ${max}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'somme': {
+                    const array = getArrayValues();
+                    
+                    steps.push('Début de la fonction somme');
+                    steps.push('S = 0');
+                    
+                    let sum = 0;
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        sum += array[i];
+                        steps.push(`S = S + t[${i}] = ${sum - array[i]} + ${array[i]} = ${sum}`);
+                    }
+                    
+                    result = `La somme des éléments du tableau est: ${sum}`;
+                    steps.push(`Retourne S = ${sum}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'sommediv': {
+                    const num = parseInt(document.getElementById('input-number').value);
+                    if (isNaN(num) || num <= 0) {
+                        alert('Veuillez entrer un nombre entier positif');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction sommediv');
+                    steps.push('S = 0');
+                    
+                    let sum = 0;
+                    
+                    for (let i = 1; i <= num; i++) {
+                        steps.push(`Vérification si ${num} mod ${i} = ${num % i}`);
+                        if (num % i === 0) {
+                            sum += i;
+                            steps.push(`${i} est un diviseur de ${num}, donc S = S + ${i} = ${sum}`);
+                        } else {
+                            steps.push(`${i} n'est pas un diviseur de ${num}`);
+                        }
+                    }
+                    
+                    result = `La somme des diviseurs de ${num} est: ${sum}`;
+                    steps.push(`Retourne S = ${sum}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'pgcd': {
+                    let a = parseInt(document.getElementById('first-number').value);
+                    let b = parseInt(document.getElementById('second-number').value);
+                    if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) {
+                        alert('Veuillez entrer deux nombres entiers positifs');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction pgcd');
+                    steps.push(`a = ${a}, b = ${b}`);
+                    
+                    let originalA = a;
+                    let originalB = b;
+                    
+                    while (a !== b) {
+                        steps.push(`a = ${a}, b = ${b}`);
+                        if (a > b) {
+                            let oldA = a;
+                            a = a - b;
+                            steps.push(`a > b, donc a = ${oldA} - ${b} = ${a}`);
+                        } else {
+                            let oldB = b;
+                            b = b - a;
+                            steps.push(`a ≤ b, donc b = ${oldB} - ${a} = ${b}`);
+                        }
+                    }
+                    
+                    result = `Le PGCD de ${originalA} et ${originalB} est: ${a}`;
+                    steps.push(`a = b = ${a}, donc PGCD = ${a}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'ppcm': {
+                    let a = parseInt(document.getElementById('first-number').value);
+                    let b = parseInt(document.getElementById('second-number').value);
+                    if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) {
+                        alert('Veuillez entrer deux nombres entiers positifs');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction ppcm');
+                    steps.push(`a = ${a}, b = ${b}`);
+                    steps.push(`x = a = ${a}`);
+                    
+                    let x = a;
+                    let iterations = 0;
+                    const maxIterations = 1000; // Pour éviter les boucles infinies
+                    
+                    while (x % b !== 0 && iterations < maxIterations) {
+                        steps.push(`x mod b = ${x} mod ${b} = ${x % b} ≠ 0`);
+                        x = x + a;
+                        steps.push(`x = x + a = ${x - a} + ${a} = ${x}`);
+                        iterations++;
+                    }
+                    
+                    if (iterations >= maxIterations) {
+                        result = "Trop d'itérations, veuillez essayer des nombres plus petits";
+                    } else {
+                        result = `Le PPCM de ${a} et ${b} est: ${x}`;
+                        steps.push(`x mod b = ${x} mod ${b} = 0, donc PPCM = ${x}`);
+                        steps.push('Fin de la fonction');
+                    }
+                    break;
+                }
+                
+                // Existing sorting algorithms
+                case 'tri_selection':
+                case 'tri_insertion':
+                case 'tri_bulle':
+                    // Existing implementations
+                    break;
+                
+                // New algorithm implementations
+                case 'saisir_controle': {
+                    const num = parseInt(document.getElementById('input-number').value);
+                    
+                    steps.push('Début de la procédure saisir');
+                    steps.push(`Saisie de m = ${num}`);
+                    
+                    if (num >= 5 && num <= 10) {
+                        result = `La valeur ${num} est valide car elle est comprise entre 5 et 10`;
+                        steps.push(`Vérification si ${num} dans [5..10] = Vrai`);
+                        steps.push('Fin de la procédure');
+                    } else {
+                        result = `La valeur ${num} est invalide, elle doit être comprise entre 5 et 10`;
+                        steps.push(`Vérification si ${num} dans [5..10] = Faux`);
+                        steps.push('Nécessite une nouvelle saisie');
+                    }
+                    break;
+                }
+                
+                case 'remplir_simple': {
+                    const array = getArrayValues();
+                    result = `Tableau rempli: [${array.join(', ')}]`;
+                    steps.push('Début de la procédure remplir');
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`v[${i}] = ${array[i]}`);
+                    }
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_positif': {
+                    const array = getArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    let allPositive = true;
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} > 0`);
+                        if (array[i] <= 0) {
+                            allPositive = false;
+                            steps.push(`t[${i}] n'est pas positif, nécessite une nouvelle saisie`);
+                        } else {
+                            steps.push(`t[${i}] = ${array[i]} est positif, accepté`);
+                        }
+                    }
+                    
+                    result = allPositive ? 
+                        `Tableau rempli: [${array.join(', ')}]` : 
+                        `Certaines valeurs ne sont pas positives, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_aleatoire': {
+                    const size = parseInt(arraySize.value);
+                    const randomArray = [];
+                    
+                    steps.push('Début de la procédure remplir');
+                    
+                    for (let i = 0; i < size; i++) {
+                        const randomValue = Math.floor(Math.random() * 81) + 10; // Between 10 and 90
+                        randomArray.push(randomValue);
+                        steps.push(`t[${i}] ← aléa(10, 90) = ${randomValue}`);
+                    }
+                    
+                    result = `Tableau rempli avec des valeurs aléatoires: [${randomArray.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_lettres': {
+                    const size = parseInt(arraySize.value);
+                    const randomArray = [];
+                    
+                    steps.push('Début de la procédure remplir');
+                    
+                    for (let i = 0; i < size; i++) {
+                        const randomChar = String.fromCharCode(Math.floor(Math.random() * 26) + 65); // A-Z
+                        randomArray.push(randomChar);
+                        steps.push(`t[${i}] ← chr(aléa(ord('A'), ord('Z'))) = ${randomChar}`);
+                    }
+                    
+                    result = `Tableau rempli avec des lettres aléatoires: [${randomArray.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_ordre': {
+                    const array = getArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    let isOrdered = true;
+                    for (let i = 1; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} > t[${i-1}] = ${array[i-1]}`);
+                        if (array[i] <= array[i-1]) {
+                            isOrdered = false;
+                            steps.push(`t[${i}] n'est pas supérieur à t[${i-1}], nécessite une nouvelle saisie`);
+                        } else {
+                            steps.push(`t[${i}] est supérieur à t[${i-1}], accepté`);
+                        }
+                    }
+                    
+                    result = isOrdered ? 
+                        `Tableau rempli en ordre: [${array.join(', ')}]` : 
+                        `Certaines valeurs ne respectent pas l'ordre croissant, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_deuxchiffres': {
+                    const array = getArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    let allTwoDigits = true;
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si 10 <= t[${i}] = ${array[i]} <= 99`);
+                        if (array[i] < 10 || array[i] > 99) {
+                            allTwoDigits = false;
+                            steps.push(`t[${i}] n'est pas un entier à deux chiffres, nécessite une nouvelle saisie`);
+                        } else {
+                            steps.push(`t[${i}] est un entier à deux chiffres, accepté`);
+                        }
+                    }
+                    
+                    result = allTwoDigits ? 
+                        `Tableau rempli avec des entiers à deux chiffres: [${array.join(', ')}]` : 
+                        `Certaines valeurs ne sont pas des entiers à deux chiffres, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_distinct': {
+                    const array = getArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    // Check for duplicates
+                    const seen = new Set();
+                    let hasDuplicates = false;
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si la valeur ${array[i]} est déjà présente dans le tableau`);
+                        
+                        if (seen.has(array[i])) {
+                            hasDuplicates = true;
+                            steps.push(`La valeur ${array[i]} est déjà présente, nécessite une nouvelle saisie`);
+                        } else {
+                            seen.add(array[i]);
+                            steps.push(`La valeur ${array[i]} est unique, acceptée`);
+                        }
+                    }
+                    
+                    result = hasDuplicates ? 
+                        `Des valeurs sont dupliquées, veuillez refaire la saisie` : 
+                        `Tableau rempli avec des valeurs distinctes: [${array.join(', ')}]`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'nbocc': {
+                    const array = getArrayValues();
+                    const searchValue = parseInt(document.getElementById('search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction nbocc');
+                    steps.push(`nb = 0`);
+                    
+                    let count = 0;
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} = ${searchValue}`);
+                        if (array[i] === searchValue) {
+                            count++;
+                            steps.push(`t[${i}] = ${searchValue}, donc nb = nb + 1 = ${count}`);
+                        } else {
+                            steps.push(`t[${i}] ≠ ${searchValue}, nb reste ${count}`);
+                        }
+                    }
+                    
+                    result = `Le nombre d'occurrences de ${searchValue} est: ${count}`;
+                    steps.push(`Retourne nb = ${count}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'verif_lettres': {
+                    const str = document.getElementById('input-number').value;
+                    
+                    steps.push('Début de la fonction verif');
+                    steps.push(`i = 0, test = Vrai`);
+                    
+                    let isValid = true;
+                    let i = 0;
+                    
+                    while (i < str.length && isValid) {
+                        const char = str[i].toUpperCase();
+                        steps.push(`Vérification si 'A' < majus(ch[${i}]) = '${char}' < 'Z'`);
+                        
+                        if (char >= 'A' && char <= 'Z') {
+                            steps.push(`'${char}' est une lettre alphabétique, donc i = i + 1 = ${i + 1}`);
+                            i++;
+                        } else {
+                            isValid = false;
+                            steps.push(`'${char}' n'est pas une lettre alphabétique, donc test = Faux`);
+                        }
+                    }
+                    
+                    result = isValid ? 
+                        `La chaîne "${str}" ne contient que des lettres alphabétiques` : 
+                        `La chaîne "${str}" contient des caractères non alphabétiques`;
+                    
+                    steps.push(`Retourne test = ${isValid ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'inverse': {
+                    const str = document.getElementById('input-number').value;
+                    
+                    steps.push('Début de la fonction inverse');
+                    steps.push(`ch1 = ''`);
+                    
+                    let reversed = '';
+                    
+                    for (let i = 0; i < str.length; i++) {
+                        reversed = str[i] + reversed;
+                        steps.push(`ch1 = ch[${i}] + ch1 = '${str[i]}' + '${reversed.substring(1)}' = '${reversed}'`);
+                    }
+                    
+                    result = `L'inverse de "${str}" est: "${reversed}"`;
+                    steps.push(`Retourne ch1 = '${reversed}'`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'nbdiv': {
+                    const num = parseInt(document.getElementById('input-number').value);
+                    if (isNaN(num) || num <= 0) {
+                        alert('Veuillez entrer un nombre entier positif');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction nbdiv');
+                    steps.push('nb = 0');
+                    
+                    let count = 0;
+                    
+                    for (let i = 1; i <= num; i++) {
+                        steps.push(`Vérification si ${num} mod ${i} = ${num % i}`);
+                        if (num % i === 0) {
+                            count++;
+                            steps.push(`${i} est un diviseur de ${num}, donc nb = nb + 1 = ${count}`);
+                        } else {
+                            steps.push(`${i} n'est pas un diviseur de ${num}`);
+                        }
+                    }
+                    
+                    result = `Le nombre de diviseurs de ${num} est: ${count}`;
+                    steps.push(`Retourne nb = ${count}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'sommechiffre': {
+                    let num = parseInt(document.getElementById('input-number').value);
+                    if (isNaN(num) || num < 0) {
+                        alert('Veuillez entrer un nombre entier positif');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction sommechiffre');
+                    steps.push('S = 0');
+                    
+                    let sum = 0;
+                    let originalNum = num;
+                    
+                    do {
+                        const digit = num % 10;
+                        sum += digit;
+                        steps.push(`S = S + N MOD 10 = ${sum - digit} + ${digit} = ${sum}`);
+                        
+                        num = Math.floor(num / 10);
+                        steps.push(`N = N DIV 10 = ${num}`);
+                    } while (num > 0);
+                    
+                    result = `La somme des chiffres de ${originalNum} est: ${sum}`;
+                    steps.push(`Retourne S = ${sum}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'affichage': {
+                    const array = getArrayValues();
+                    
+                    steps.push('Début de la procédure affichage');
+                    let output = '';
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Affichage: V[${i}] = ${array[i]}`);
+                        output += `V[${i}] = ${array[i]}<br>`;
+                    }
+                    
+                    result = output;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'affichage_pairs': {
+                    const array = getArrayValues();
+                    
+                    steps.push('Début de la procédure affiche');
+                    let output = '';
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} mod 2 = ${array[i] % 2}`);
+                        if (array[i] % 2 === 0) {
+                            steps.push(`t[${i}] est pair, donc affichage: T[${i}] = ${array[i]}`);
+                            output += `T[${i}] = ${array[i]}<br>`;
+                        } else {
+                            steps.push(`t[${i}] est impair, pas d'affichage`);
+                        }
+                    }
+                    
+                    result = output || 'Aucun élément pair dans le tableau';
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'extraire': {
+                    const array = getArrayValues();
+                    
+                    steps.push('Début de la procédure extraire');
+                    steps.push('j = 0, k = 0');
+                    
+                    const evens = [];
+                    const odds = [];
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} mod 2 = ${array[i] % 2}`);
+                        if (array[i] % 2 === 0) {
+                            evens.push(array[i]);
+                            steps.push(`t[${i}] est pair, donc Tp[${evens.length - 1}] = ${array[i]}, j = j + 1 = ${evens.length}`);
+                        } else {
+                            odds.push(array[i]);
+                            steps.push(`t[${i}] est impair, donc Timp[${odds.length - 1}] = ${array[i]}, k = k + 1 = ${odds.length}`);
+                        }
+                    }
+                    
+                    result = `Tableau des éléments pairs (TP): [${evens.join(', ')}]<br>Tableau des éléments impairs (Timp): [${odds.join(', ')}]`;
+                    steps.push(`Tableau TP de taille ${evens.length}: [${evens.join(', ')}]`);
+                    steps.push(`Tableau Timp de taille ${odds.length}: [${odds.join(', ')}]`);
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'insertion': {
+                    const array = getArrayValues();
+                    const position = parseInt(document.getElementById('insert-position').value);
+                    const value = parseInt(document.getElementById('insert-value').value);
+                    
+                    if (isNaN(position) || position < 0 || position > array.length) {
+                        alert(`La position doit être entre 0 et ${array.length}`);
+                        return;
+                    }
+                    
+                    if (isNaN(value)) {
+                        alert('Veuillez entrer une valeur à insérer valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la procédure insertion');
+                    
+                    const result_array = [...array];
+                    // Push a placeholder to increase array size
+                    result_array.push(null);
+                    
+                    for (let i = result_array.length - 1; i > position; i--) {
+                        result_array[i] = result_array[i - 1];
+                        steps.push(`t[${i}] = t[${i-1}] = ${result_array[i]}`);
+                    }
+                    
+                    result_array[position] = value;
+                    steps.push(`t[${position}] = ${value}`);
+                    
+                    result = `Tableau après insertion: [${result_array.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_lettresonly': {
+                    // Get values from the modal array inputs as strings
+                    const size = parseInt(document.getElementById('modal-array-size').value);
+                    const array = [];
+                    
+                    for (let i = 0; i < size; i++) {
+                        const element = document.getElementById(`modal-array-element-${i}`);
+                        if (element) {
+                            array.push(element.value.toString());
+                        }
+                    }
+                    
+                    steps.push('Début de la procédure remplir');
+                    
+                    // Helper function to check if a string contains only letters
+                    const containsOnlyLetters = str => /^[A-Za-z]+$/.test(str);
+                    
+                    let allLetters = true;
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si verif(t[${i}]) = verif("${array[i]}")`);
+                        
+                        if (containsOnlyLetters(array[i])) {
+                            steps.push(`"${array[i]}" ne contient que des lettres, accepté`);
+                        } else {
+                            allLetters = false;
+                            steps.push(`"${array[i]}" contient des caractères non alphabétiques, nécessite une nouvelle saisie`);
+                        }
+                    }
+                    
+                    result = allLetters ? 
+                        `Tableau rempli avec des chaînes alphabétiques: [${array.join(', ')}]` : 
+                        `Certaines valeurs contiennent des caractères non alphabétiques, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                default:
+                    result = "Algorithme non implémenté";
+            }
+            
+            // Display results with animation
+            if (result) {
+                // Handle HTML content in result
+                if (result.includes('<br>')) {
+                    resultContent.innerHTML = result;
+                } else {
+                    resultContent.textContent = result;
+                }
+                
+                executionSteps.innerHTML = steps.map(step => 
+                    `<div class="execution-step">${step}</div>`
+                ).join('');
+                
+                // Fade in results
+                resultsSection.style.opacity = '0';
+                resultsSection.classList.remove('hidden');
+                setTimeout(() => {
+                    resultsSection.style.transition = 'opacity 0.3s ease-in-out';
+                    resultsSection.style.opacity = '1';
+                    
+                    // Ensure scrolling works by setting explicit styles
+                    executionSteps.style.overflowY = 'auto';
+                    executionSteps.style.maxHeight = '400px';
+                    executionSteps.style.display = 'block';
+                    
+                    // Scroll to the top of the execution steps
+                    executionSteps.scrollTop = 0;
+                    
+                    // Ensure modal execution steps also have proper scrolling
+                    const modalExecutionSteps = document.getElementById('modal-execution-steps');
+                    if (modalExecutionSteps) {
+                        modalExecutionSteps.style.overflowY = 'auto';
+                        modalExecutionSteps.style.maxHeight = '400px';
+                        modalExecutionSteps.style.display = 'block';
+                        modalExecutionSteps.scrollTop = 0;
+                    }
+                }, 0);
+            }
+        }
+
+        // Populate array with random numbers
+        function fillRandomArray() {
+            const size = parseInt(arraySize.value);
+            if (isNaN(size) || size < 1 || size > 20) return;
+            
+            for (let i = 0; i < size; i++) {
+                const element = document.getElementById(`array-element-${i}`);
+                if (element) {
+                    element.value = Math.floor(Math.random() * 100);
+                }
+            }
+        }
+
+        // Add input validation and formatting
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value === '') return;
+                const num = parseInt(this.value);
+                if (isNaN(num)) {
+                    this.classList.add('border-red-500');
+                } else {
+                    this.classList.remove('border-red-500');
+                }
+            });
+        });
+
+        // Add loading state to buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.dataset.loading) return;
+                
+                const originalText = this.textContent;
+                this.dataset.loading = 'true';
+                this.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    ${originalText}
+                `;
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    delete this.dataset.loading;
+                }, 500);
+            });
+        });
+
+        // Function to open the algorithm modal
+        function openAlgorithmModal(algoKey) {
+            const algo = algorithms[algoKey];
+            const modal = document.getElementById('algorithm-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalAlgorithmInfo = document.getElementById('modal-algorithm-info');
+            const modalInteractiveSection = document.getElementById('modal-interactive-section');
+            const modalResultsSection = document.getElementById('modal-results-section');
+            
+            // Set modal title
+            modalTitle.textContent = algo.title;
+            
+            // Prepare algorithm info
+            modalAlgorithmInfo.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Description de l'algorithme</h2>
+                <div class="pseudo-code p-4 rounded-lg mb-4">
+                    <pre class="whitespace-pre-wrap text-sm">${algo.pseudocode}</pre>
+                </div>
+                <p class="text-gray-600 mb-4">${algo.description}</p>
+            `;
+            
+            // Prepare interactive section
+            modalInteractiveSection.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Section Interactive</h2>
+                <div id="modal-tableau-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Taille du tableau:</label>
+                        <input type="number" id="modal-array-size" min="1" max="20" value="5" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <div class="flex space-x-2 mt-2">
+                            <button id="modal-generate-array" 
+                                    class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Générer un tableau
+                            </button>
+                            <button id="modal-random-fill" 
+                                    class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
+                                Valeurs aléatoires
+                            </button>
+                        </div>
+                    </div>
+                    <div id="modal-array-elements" class="hidden space-y-2">
+                        <!-- Array elements will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <div id="modal-number-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Entrez un nombre:</label>
+                        <input type="number" id="modal-input-number" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div id="modal-two-numbers-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">a:</label>
+                        <input type="number" id="modal-first-number" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">b:</label>
+                        <input type="number" id="modal-second-number" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div id="modal-search-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Valeur à rechercher:</label>
+                        <input type="number" id="modal-search-value" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div id="modal-position-input" class="hidden space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Position d'insertion:</label>
+                        <input type="number" id="modal-insert-position" min="0" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-gray-700 mb-2">Valeur à insérer:</label>
+                        <input type="number" id="modal-insert-value" 
+                               class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <button id="modal-execute-button" 
+                        class="mt-6 w-full bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    Exécuter
+                </button>
+            `;
+            
+            // Prepare results section
+            modalResultsSection.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Résultats</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div id="modal-result-content" class="bg-blue-50 p-4 rounded-lg text-blue-800 max-h-[400px] overflow-y-auto"></div>
+                    </div>
+                    <div id="modal-step-by-step">
+                        <h3 class="font-bold mb-3 text-gray-800">Étapes d'exécution:</h3>
+                        <div id="modal-execution-steps" class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                            <!-- Steps will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Set up interactive section based on algorithm type
+            setupModalInteractiveSection(algoKey);
+            
+            // Show the modal with animation
+            document.body.classList.add('modal-open');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+            
+            // Add event listeners for modal functionality
+            setupModalEventListeners(algoKey);
+        }
+        
+        // Function to close the algorithm modal
+        function closeAlgorithmModal() {
+            const modal = document.getElementById('algorithm-modal');
+            
+            // Hide with animation
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.classList.remove('modal-open');
+                
+                // Reset modal state
+                document.getElementById('modal-results-section').classList.add('hidden');
+                
+                // Ensure body scrolling is restored
+                document.body.style.overflow = 'auto';
+                document.documentElement.style.overflow = 'auto';
+            }, 300);
+        }
+        
+        // Setup modal event listeners
+        function setupModalEventListeners(algoKey) {
+            // Close button
+            document.getElementById('close-modal').addEventListener('click', closeAlgorithmModal);
+            
+            // Close on ESC key
+            const closeOnEsc = function(e) {
+                if (e.key === 'Escape') {
+                    closeAlgorithmModal();
+                    document.removeEventListener('keydown', closeOnEsc);
+                }
+            };
+            document.addEventListener('keydown', closeOnEsc);
+            
+            // Close on outside click
+            const modalElement = document.getElementById('algorithm-modal');
+            const closeOnOutsideClick = function(e) {
+                if (e.target === modalElement) {
+                    closeAlgorithmModal();
+                    modalElement.removeEventListener('click', closeOnOutsideClick);
+                }
+            };
+            modalElement.addEventListener('click', closeOnOutsideClick);
+            
+            // Generate array button
+            const generateArrayBtn = document.getElementById('modal-generate-array');
+            if (generateArrayBtn) {
+                // Remove any existing event listeners
+                const newGenerateBtn = generateArrayBtn.cloneNode(true);
+                generateArrayBtn.parentNode.replaceChild(newGenerateBtn, generateArrayBtn);
+                newGenerateBtn.addEventListener('click', createModalArrayInputs);
+            }
+            
+            // Random fill button
+            const randomFillBtn = document.getElementById('modal-random-fill');
+            if (randomFillBtn) {
+                // Remove any existing event listeners
+                const newRandomFillBtn = randomFillBtn.cloneNode(true);
+                randomFillBtn.parentNode.replaceChild(newRandomFillBtn, randomFillBtn);
+                newRandomFillBtn.addEventListener('click', function() {
+                    createModalArrayInputs();
+                    fillModalRandomArray();
+                });
+            }
+            
+            // Execute button
+            const executeBtn = document.getElementById('modal-execute-button');
+            if (executeBtn) {
+                // Remove any existing event listeners
+                const newExecuteBtn = executeBtn.cloneNode(true);
+                executeBtn.parentNode.replaceChild(newExecuteBtn, executeBtn);
+                newExecuteBtn.addEventListener('click', function() {
+                    executeModalAlgorithm(algoKey);
+                });
+            }
+        }
+        
+        // Setup modal interactive section
+        function setupModalInteractiveSection(algoType) {
+            // References to modal elements
+            const tableauInput = document.getElementById('modal-tableau-input');
+            const numberInput = document.getElementById('modal-number-input');
+            const twoNumbersInput = document.getElementById('modal-two-numbers-input');
+            const searchInput = document.getElementById('modal-search-input');
+            const positionInput = document.getElementById('modal-position-input');
+            
+            // Hide all input sections first
+            tableauInput.classList.add('hidden');
+            numberInput.classList.add('hidden');
+            twoNumbersInput.classList.add('hidden');
+            searchInput.classList.add('hidden');
+            positionInput.classList.add('hidden');
+            
+            // Show appropriate inputs based on algorithm type
+            switch(algoType) {
+                // Array inputs
+                case 'remplir':
+                case 'maximum':
+                case 'somme':
+                case 'tri_selection':
+                case 'tri_insertion':
+                case 'tri_bulle':
+                case 'remplir_simple':
+                case 'remplir_positif':
+                case 'remplir_aleatoire':
+                case 'remplir_lettres':
+                case 'remplir_ordre':
+                case 'remplir_deuxchiffres':
+                case 'remplir_distinct':
+                case 'remplir_lettresonly':
+                case 'affichage':
+                case 'affichage_pairs':
+                case 'extraire':
+                    tableauInput.classList.remove('hidden');
+                    break;
+                    
+                // Array with search
+                case 'recherche':
+                case 'nbocc':
+                case 'recherche_sequentielle':
+                case 'recherche_dichotomique':
+                    tableauInput.classList.remove('hidden');
+                    searchInput.classList.remove('hidden');
+                    break;
+                    
+                // Single number input
+                case 'sommediv':
+                case 'nbdiv':
+                case 'sommechiffre':
+                case 'saisir_controle':
+                    numberInput.classList.remove('hidden');
+                    break;
+                    
+                // String input for string operations
+                case 'inverse':
+                case 'verif_lettres':
+                    // Reuse the number input field but change the label
+                    document.querySelector('#modal-number-input label').textContent = "Entrez une chaîne:";
+                    document.getElementById('modal-input-number').type = "text";
+                    numberInput.classList.remove('hidden');
+                    break;
+                    
+                // Two numbers input
+                case 'pgcd':
+                case 'ppcm':
+                    twoNumbersInput.classList.remove('hidden');
+                    break;
+                    
+                // Insertion needs array + position + value
+                case 'insertion':
+                    tableauInput.classList.remove('hidden');
+                    positionInput.classList.remove('hidden');
+                    break;
+            }
+            
+            // Reset string input if we're not using it
+            if (!['inverse', 'verif_lettres'].includes(algoType)) {
+                const label = document.querySelector('#modal-number-input label');
+                if (label) {
+                    label.textContent = "Entrez un nombre:";
+                }
+                const input = document.getElementById('modal-input-number');
+                if (input) {
+                    input.type = "number";
+                }
+            }
+        }
+        
+        // Create array inputs in modal
+        function createModalArrayInputs() {
+            const arraySize = document.getElementById('modal-array-size');
+            const arrayElements = document.getElementById('modal-array-elements');
+            
+            const size = parseInt(arraySize.value);
+            if (isNaN(size) || size < 1 || size > 20) {
+                alert('Veuillez entrer une taille valide (entre 1 et 20)');
+                return;
+            }
+            
+            arrayElements.innerHTML = '';
+            
+            // Create a horizontal container for all elements
+            const horizontalContainer = document.createElement('div');
+            horizontalContainer.className = 'flex flex-wrap items-center gap-2';
+            arrayElements.appendChild(horizontalContainer);
+            
+            for (let i = 0; i < size; i++) {
+                const div = document.createElement('div');
+                div.className = 'flex-shrink-0 flex items-center';
+                div.innerHTML = `
+                    <label class="w-12 text-gray-700 text-sm">v[${i}]</label>
+                    <input type="number" id="modal-array-element-${i}" 
+                           class="w-16 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                `;
+                horizontalContainer.appendChild(div);
+            }
+            
+            // Add fade-in animation
+            arrayElements.style.opacity = '0';
+            arrayElements.classList.remove('hidden');
+            setTimeout(() => {
+                arrayElements.style.transition = 'opacity 0.3s ease-in-out';
+                arrayElements.style.opacity = '1';
+            }, 0);
+        }
+        
+        // Fill array with random values in modal
+        function fillModalRandomArray() {
+            const arraySize = document.getElementById('modal-array-size');
+            const size = parseInt(arraySize.value);
+            if (isNaN(size) || size < 1 || size > 20) return;
+            
+            for (let i = 0; i < size; i++) {
+                const element = document.getElementById(`modal-array-element-${i}`);
+                if (element) {
+                    element.value = Math.floor(Math.random() * 100);
+                }
+            }
+        }
+        
+        // Get array values from modal
+        function getModalArrayValues() {
+            const arraySize = document.getElementById('modal-array-size');
+            const size = parseInt(arraySize.value);
+            const array = [];
+            
+            for (let i = 0; i < size; i++) {
+                const element = document.getElementById(`modal-array-element-${i}`);
+                if (element) {
+                    const value = parseInt(element.value);
+                    array.push(isNaN(value) ? 0 : value);
+                }
+            }
+            
+            return array;
+        }
+        
+        // Execute algorithm in modal
+        function executeModalAlgorithm(algoKey) {
+            const resultsSection = document.getElementById('modal-results-section');
+            const resultContent = document.getElementById('modal-result-content');
+            const executionSteps = document.getElementById('modal-execution-steps');
+            
+            let result = null;
+            let steps = [];
+            
+            // Reuse existing algorithm logic with modal inputs
+            switch(algoKey) {
+                case 'maximum': {
+                    const array = getModalArrayValues();
+                    if (array.length === 0) {
+                        alert('Le tableau doit contenir au moins un élément');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction Maximum');
+                    steps.push(`Max = t[0] = ${array[0]}`);
+                    
+                    let max = array[0];
+                    
+                    for (let i = 1; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} > Max = ${max}`);
+                        if (array[i] > max) {
+                            max = array[i];
+                            steps.push(`t[${i}] > Max, donc Max = ${max}`);
+                        } else {
+                            steps.push(`t[${i}] ≤ Max, donc Max reste ${max}`);
+                        }
+                    }
+                    
+                    result = `Le maximum du tableau est: ${max}`;
+                    steps.push(`Retourne Max = ${max}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'remplir':
+                case 'remplir_simple': {
+                    const array = getModalArrayValues();
+                    result = `Tableau rempli: [${array.join(', ')}]`;
+                    steps.push('Début de la procédure');
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`v[${i}] = ${array[i]}`);
+                    }
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'recherche': {
+                    const array = getModalArrayValues();
+                    const searchValue = parseInt(document.getElementById('modal-search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction recherche');
+                    steps.push(`i = 0, trouve = Faux`);
+                    
+                    let i = 0;
+                    let trouve = false;
+                    
+                    while (i < array.length && !trouve) {
+                        steps.push(`Vérification si v[${i}] = ${searchValue}`);
+                        if (array[i] === searchValue) {
+                            trouve = true;
+                            steps.push(`v[${i}] = ${searchValue}, donc trouve = Vrai`);
+                        } else {
+                            steps.push(`v[${i}] ≠ ${searchValue}, donc i = i + 1 = ${i + 1}`);
+                            i++;
+                        }
+                    }
+                    
+                    result = trouve ? 
+                        `La valeur ${searchValue} a été trouvée à la position ${i}` : 
+                        `La valeur ${searchValue} n'a pas été trouvée dans le tableau`;
+                    
+                    steps.push(`Résultat: ${trouve ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'recherche_sequentielle': {
+                    const array = getModalArrayValues();
+                    const searchValue = parseInt(document.getElementById('modal-search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction recherche séquentielle');
+                    let trouve = false;
+                    let i = 0;
+                    steps.push('trouve ← faux');
+                    steps.push('i ← 0');
+                    
+                    do {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} == ${searchValue}`);
+                        if (array[i] === searchValue) {
+                            trouve = true;
+                            steps.push('trouve ← vrai');
+                        } else {
+                            steps.push(`i ← i + 1 = ${i + 1}`);
+                            i++;
+                        }
+                    } while (i <= array.length - 1 && !trouve);
+                    
+                    result = trouve ?
+                        `La valeur ${searchValue} a été trouvée à la position ${i}` :
+                        `La valeur ${searchValue} n'a pas été trouvée dans le tableau`;
+                    
+                    steps.push(`Résultat: ${trouve ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'recherche_dichotomique': {
+                    const array = getModalArrayValues();
+                    const searchValue = parseInt(document.getElementById('modal-search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction recherche dichotomique');
+                    let d = 0;
+                    let f = array.length - 1;
+                    let trouve = false;
+                    steps.push(`d ← 0, f ← ${array.length - 1}, trouve ← faux`);
+                    
+                    while (!trouve && d <= f) {
+                        let mil = Math.floor((d + f) / 2);
+                        steps.push(`Mil ← (d + f) div 2 = (${d} + ${f}) div 2 = ${mil}`);
+                        
+                        if (array[mil] === searchValue) {
+                            trouve = true;
+                            steps.push(`T[${mil}] = ${searchValue}, donc trouve ← vrai`);
+                        } else if (array[mil] < searchValue) {
+                            steps.push(`T[${mil}] = ${array[mil]} < ${searchValue}, donc d ← Mil + 1 = ${mil + 1}`);
+                            d = mil + 1;
+                        } else {
+                            steps.push(`T[${mil}] = ${array[mil]} > ${searchValue}, donc f ← Mil - 1 = ${mil - 1}`);
+                            f = mil - 1;
+                        }
+                    }
+                    
+                    result = trouve ?
+                        `La valeur ${searchValue} a été trouvée dans le tableau.` :
+                        `La valeur ${searchValue} n'a pas été trouvée dans le tableau.`;
+                    
+                    steps.push(`Résultat: ${trouve ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'somme': {
+                    const array = getModalArrayValues();
+                    
+                    steps.push('Début de la fonction somme');
+                    steps.push('S = 0');
+                    
+                    let sum = 0;
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        sum += array[i];
+                        steps.push(`S = S + t[${i}] = ${sum - array[i]} + ${array[i]} = ${sum}`);
+                    }
+                    
+                    result = `La somme des éléments du tableau est: ${sum}`;
+                    steps.push(`Retourne S = ${sum}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'sommediv': {
+                    const num = parseInt(document.getElementById('modal-input-number').value);
+                    if (isNaN(num) || num <= 0) {
+                        alert('Veuillez entrer un nombre entier positif');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction sommediv');
+                    steps.push('S = 0');
+                    
+                    let sum = 0;
+                    
+                    for (let i = 1; i <= num; i++) {
+                        steps.push(`Vérification si ${num} mod ${i} = ${num % i}`);
+                        if (num % i === 0) {
+                            sum += i;
+                            steps.push(`${i} est un diviseur de ${num}, donc S = S + ${i} = ${sum}`);
+                        } else {
+                            steps.push(`${i} n'est pas un diviseur de ${num}`);
+                        }
+                    }
+                    
+                    result = `La somme des diviseurs de ${num} est: ${sum}`;
+                    steps.push(`Retourne S = ${sum}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'pgcd': {
+                    let a = parseInt(document.getElementById('modal-first-number').value);
+                    let b = parseInt(document.getElementById('modal-second-number').value);
+                    if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) {
+                        alert('Veuillez entrer deux nombres entiers positifs');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction pgcd');
+                    steps.push(`a = ${a}, b = ${b}`);
+                    
+                    let originalA = a;
+                    let originalB = b;
+                    
+                    while (a !== b) {
+                        steps.push(`a = ${a}, b = ${b}`);
+                        if (a > b) {
+                            let oldA = a;
+                            a = a - b;
+                            steps.push(`a > b, donc a = ${oldA} - ${b} = ${a}`);
+                        } else {
+                            let oldB = b;
+                            b = b - a;
+                            steps.push(`a ≤ b, donc b = ${oldB} - ${a} = ${b}`);
+                        }
+                    }
+                    
+                    result = `Le PGCD de ${originalA} et ${originalB} est: ${a}`;
+                    steps.push(`a = b = ${a}, donc PGCD = ${a}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'ppcm': {
+                    let a = parseInt(document.getElementById('modal-first-number').value);
+                    let b = parseInt(document.getElementById('modal-second-number').value);
+                    if (isNaN(a) || isNaN(b) || a <= 0 || b <= 0) {
+                        alert('Veuillez entrer deux nombres entiers positifs');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction ppcm');
+                    steps.push(`a = ${a}, b = ${b}`);
+                    steps.push(`x = a = ${a}`);
+                    
+                    let x = a;
+                    let iterations = 0;
+                    const maxIterations = 1000; // Pour éviter les boucles infinies
+                    
+                    while (x % b !== 0 && iterations < maxIterations) {
+                        steps.push(`x mod b = ${x} mod ${b} = ${x % b} ≠ 0`);
+                        x = x + a;
+                        steps.push(`x = x + a = ${x - a} + ${a} = ${x}`);
+                        iterations++;
+                    }
+                    
+                    if (iterations >= maxIterations) {
+                        result = "Trop d'itérations, veuillez essayer des nombres plus petits";
+                    } else {
+                        result = `Le PPCM de ${a} et ${b} est: ${x}`;
+                        steps.push(`x mod b = ${x} mod ${b} = 0, donc PPCM = ${x}`);
+                        steps.push('Fin de la fonction');
+                    }
+                    break;
+                }
+                
+                case 'tri_selection': {
+                    const array = getModalArrayValues();
+                    if (array.length === 0) {
+                        alert('Le tableau doit contenir au moins un élément');
+                        return;
+                    }
+                    
+                    steps.push('Début de la procédure TriParSélection');
+                    
+                    const sortedArray = [...array];
+                    
+                    for (let i = 0; i < sortedArray.length - 1; i++) {
+                        steps.push(`Itération i=${i}: Recherche du minimum à partir de la position ${i}`);
+                        let minIndex = i;
+                        steps.push(`Initialisation: pmin = ${i}`);
+                        
+                        for (let j = i + 1; j < sortedArray.length; j++) {
+                            steps.push(`Comparaison: T[${j}]=${sortedArray[j]} < T[${minIndex}]=${sortedArray[minIndex]} ?`);
+                            
+                            if (sortedArray[j] < sortedArray[minIndex]) {
+                                minIndex = j;
+                                steps.push(`Nouveau minimum trouvé: pmin = ${j}`);
+                            } else {
+                                steps.push(`Pas de nouveau minimum, pmin reste ${minIndex}`);
+                            }
+                        }
+                        
+                        if (i !== minIndex) {
+                            steps.push(`Échange des éléments: T[${i}]=${sortedArray[i]} et T[${minIndex}]=${sortedArray[minIndex]}`);
+                            const temp = sortedArray[i];
+                            sortedArray[i] = sortedArray[minIndex];
+                            sortedArray[minIndex] = temp;
+                            steps.push(`Tableau après échange: [${sortedArray.join(', ')}]`);
+                        } else {
+                            steps.push(`Pas d'échange nécessaire car i = pmin = ${i}`);
+                        }
+                    }
+                    
+                    result = `Tableau trié: [${sortedArray.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'tri_insertion': {
+                    const array = getModalArrayValues();
+                    if (array.length === 0) {
+                        alert('Le tableau doit contenir au moins un élément');
+                        return;
+                    }
+                    
+                    steps.push('Début de la procédure TriParInsertion');
+                    
+                    const sortedArray = [...array];
+                    
+                    for (let i = 1; i < sortedArray.length; i++) {
+                        const tmp = sortedArray[i];
+                        steps.push(`Itération i=${i}: Insertion de l'élément ${tmp}`);
+                        steps.push(`Tmp = T[${i}] = ${tmp}`);
+                        
+                        let j = i - 1;
+                        steps.push(`j = i - 1 = ${j}`);
+                        
+                        steps.push(`Comparaison: T[${j}]=${sortedArray[j]} > Tmp=${tmp} et j >= 0 ?`);
+                        
+                        while (j >= 0 && sortedArray[j] > tmp) {
+                            sortedArray[j + 1] = sortedArray[j];
+                            steps.push(`Décalage: T[${j+1}] = T[${j}] = ${sortedArray[j]}`);
+                            
+                            j--;
+                            steps.push(`j = j - 1 = ${j}`);
+                            
+                            if (j >= 0) {
+                                steps.push(`Comparaison: T[${j}]=${sortedArray[j]} > Tmp=${tmp} et j >= 0 ?`);
+                            }
+                        }
+                        
+                        sortedArray[j + 1] = tmp;
+                        steps.push(`Insertion: T[${j+1}] = Tmp = ${tmp}`);
+                        steps.push(`Tableau après insertion: [${sortedArray.join(', ')}]`);
+                    }
+                    
+                    result = `Tableau trié: [${sortedArray.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'tri_bulle': {
+                    const array = getModalArrayValues();
+                    if (array.length === 0) {
+                        alert('Le tableau doit contenir au moins un élément');
+                        return;
+                    }
+                    
+                    steps.push('Début de la procédure Tri_A_Bulle');
+                    
+                    const sortedArray = [...array];
+                    let iteration = 0;
+                    let permut;
+                    
+                    do {
+                        iteration++;
+                        steps.push(`Itération ${iteration}`);
+                        steps.push(`Permut = Faux`);
+                        permut = false;
+                        
+                        for (let i = 0; i < sortedArray.length - 1; i++) {
+                            steps.push(`Comparaison: T[${i}]=${sortedArray[i]} > T[${i+1}]=${sortedArray[i+1]} ?`);
+                            
+                            if (sortedArray[i] > sortedArray[i + 1]) {
+                                steps.push(`Échange des éléments: T[${i}]=${sortedArray[i]} et T[${i+1}]=${sortedArray[i+1]}`);
+                                
+                                const aux = sortedArray[i];
+                                sortedArray[i] = sortedArray[i + 1];
+                                sortedArray[i + 1] = aux;
+                                
+                                permut = true;
+                                steps.push(`Permut = Vrai`);
+                                steps.push(`Tableau après échange: [${sortedArray.join(', ')}]`);
+                            } else {
+                                steps.push(`Pas d'échange nécessaire`);
+                            }
+                        }
+                        
+                        steps.push(`Fin de l'itération ${iteration}, Permut = ${permut ? 'Vrai' : 'Faux'}`);
+                    } while (permut);
+                    
+                    result = `Tableau trié: [${sortedArray.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'saisir_controle': {
+                    const num = parseInt(document.getElementById('modal-input-number').value);
+                    
+                    steps.push('Début de la procédure saisir');
+                    steps.push(`Saisie de m = ${num}`);
+                    
+                    if (num >= 5 && num <= 10) {
+                        result = `La valeur ${num} est valide car elle est comprise entre 5 et 10`;
+                        steps.push(`Vérification si ${num} dans [5..10] = Vrai`);
+                        steps.push('Fin de la procédure');
+                    } else {
+                        result = `La valeur ${num} est invalide, elle doit être comprise entre 5 et 10`;
+                        steps.push(`Vérification si ${num} dans [5..10] = Faux`);
+                        steps.push('Nécessite une nouvelle saisie');
+                    }
+                    break;
+                }
+                
+                case 'remplir_positif': {
+                    const array = getModalArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    let allPositive = true;
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} > 0`);
+                        if (array[i] <= 0) {
+                            allPositive = false;
+                            steps.push(`t[${i}] n'est pas positif, nécessite une nouvelle saisie`);
+                        } else {
+                            steps.push(`t[${i}] = ${array[i]} est positif, accepté`);
+                        }
+                    }
+                    
+                    result = allPositive ? 
+                        `Tableau rempli: [${array.join(', ')}]` : 
+                        `Certaines valeurs ne sont pas positives, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_aleatoire': {
+                    const size = parseInt(document.getElementById('modal-array-size').value);
+                    const randomArray = [];
+                    
+                    steps.push('Début de la procédure remplir');
+                    
+                    for (let i = 0; i < size; i++) {
+                        const randomValue = Math.floor(Math.random() * 81) + 10; // Between 10 and 90
+                        randomArray.push(randomValue);
+                        steps.push(`t[${i}] ← aléa(10, 90) = ${randomValue}`);
+                    }
+                    
+                    result = `Tableau rempli avec des valeurs aléatoires: [${randomArray.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_lettres': {
+                    const size = parseInt(document.getElementById('modal-array-size').value);
+                    const randomArray = [];
+                    
+                    steps.push('Début de la procédure remplir');
+                    
+                    for (let i = 0; i < size; i++) {
+                        const randomChar = String.fromCharCode(Math.floor(Math.random() * 26) + 65); // A-Z
+                        randomArray.push(randomChar);
+                        steps.push(`t[${i}] ← chr(aléa(ord('A'), ord('Z'))) = ${randomChar}`);
+                    }
+                    
+                    result = `Tableau rempli avec des lettres aléatoires: [${randomArray.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_ordre': {
+                    const array = getModalArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    let isOrdered = true;
+                    for (let i = 1; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} > t[${i-1}] = ${array[i-1]}`);
+                        if (array[i] <= array[i-1]) {
+                            isOrdered = false;
+                            steps.push(`t[${i}] n'est pas supérieur à t[${i-1}], nécessite une nouvelle saisie`);
+                        } else {
+                            steps.push(`t[${i}] est supérieur à t[${i-1}], accepté`);
+                        }
+                    }
+                    
+                    result = isOrdered ? 
+                        `Tableau rempli en ordre: [${array.join(', ')}]` : 
+                        `Certaines valeurs ne respectent pas l'ordre croissant, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_deuxchiffres': {
+                    const array = getModalArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    let allTwoDigits = true;
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si 10 <= t[${i}] = ${array[i]} <= 99`);
+                        if (array[i] < 10 || array[i] > 99) {
+                            allTwoDigits = false;
+                            steps.push(`t[${i}] n'est pas un entier à deux chiffres, nécessite une nouvelle saisie`);
+                        } else {
+                            steps.push(`t[${i}] est un entier à deux chiffres, accepté`);
+                        }
+                    }
+                    
+                    result = allTwoDigits ? 
+                        `Tableau rempli avec des entiers à deux chiffres: [${array.join(', ')}]` : 
+                        `Certaines valeurs ne sont pas des entiers à deux chiffres, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_distinct': {
+                    const array = getModalArrayValues();
+                    steps.push('Début de la procédure remplir');
+                    
+                    // Check for duplicates
+                    const seen = new Set();
+                    let hasDuplicates = false;
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si la valeur ${array[i]} est déjà présente dans le tableau`);
+                        
+                        if (seen.has(array[i])) {
+                            hasDuplicates = true;
+                            steps.push(`La valeur ${array[i]} est déjà présente, nécessite une nouvelle saisie`);
+                        } else {
+                            seen.add(array[i]);
+                            steps.push(`La valeur ${array[i]} est unique, acceptée`);
+                        }
+                    }
+                    
+                    result = hasDuplicates ? 
+                        `Des valeurs sont dupliquées, veuillez refaire la saisie` : 
+                        `Tableau rempli avec des valeurs distinctes: [${array.join(', ')}]`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'nbocc': {
+                    const array = getModalArrayValues();
+                    const searchValue = parseInt(document.getElementById('modal-search-value').value);
+                    if (isNaN(searchValue)) {
+                        alert('Veuillez entrer une valeur de recherche valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction nbocc');
+                    steps.push(`nb = 0`);
+                    
+                    let count = 0;
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} = ${searchValue}`);
+                        if (array[i] === searchValue) {
+                            count++;
+                            steps.push(`t[${i}] = ${searchValue}, donc nb = nb + 1 = ${count}`);
+                        } else {
+                            steps.push(`t[${i}] ≠ ${searchValue}, nb reste ${count}`);
+                        }
+                    }
+                    
+                    result = `Le nombre d'occurrences de ${searchValue} est: ${count}`;
+                    steps.push(`Retourne nb = ${count}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'verif_lettres': {
+                    const str = document.getElementById('modal-input-number').value;
+                    
+                    steps.push('Début de la fonction verif');
+                    steps.push(`i = 0, test = Vrai`);
+                    
+                    let isValid = true;
+                    let i = 0;
+                    
+                    while (i < str.length && isValid) {
+                        const char = str[i].toUpperCase();
+                        steps.push(`Vérification si 'A' < majus(ch[${i}]) = '${char}' < 'Z'`);
+                        
+                        if (char >= 'A' && char <= 'Z') {
+                            steps.push(`'${char}' est une lettre alphabétique, donc i = i + 1 = ${i + 1}`);
+                            i++;
+                        } else {
+                            isValid = false;
+                            steps.push(`'${char}' n'est pas une lettre alphabétique, donc test = Faux`);
+                        }
+                    }
+                    
+                    result = isValid ? 
+                        `La chaîne "${str}" ne contient que des lettres alphabétiques` : 
+                        `La chaîne "${str}" contient des caractères non alphabétiques`;
+                    
+                    steps.push(`Retourne test = ${isValid ? 'Vrai' : 'Faux'}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'inverse': {
+                    const str = document.getElementById('modal-input-number').value;
+                    
+                    steps.push('Début de la fonction inverse');
+                    steps.push(`ch1 = ''`);
+                    
+                    let reversed = '';
+                    
+                    for (let i = 0; i < str.length; i++) {
+                        reversed = str[i] + reversed;
+                        steps.push(`ch1 = ch[${i}] + ch1 = '${str[i]}' + '${reversed.substring(1)}' = '${reversed}'`);
+                    }
+                    
+                    result = `L'inverse de "${str}" est: "${reversed}"`;
+                    steps.push(`Retourne ch1 = '${reversed}'`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'nbdiv': {
+                    const num = parseInt(document.getElementById('modal-input-number').value);
+                    if (isNaN(num) || num <= 0) {
+                        alert('Veuillez entrer un nombre entier positif');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction nbdiv');
+                    steps.push('nb = 0');
+                    
+                    let count = 0;
+                    
+                    for (let i = 1; i <= num; i++) {
+                        steps.push(`Vérification si ${num} mod ${i} = ${num % i}`);
+                        if (num % i === 0) {
+                            count++;
+                            steps.push(`${i} est un diviseur de ${num}, donc nb = nb + 1 = ${count}`);
+                        } else {
+                            steps.push(`${i} n'est pas un diviseur de ${num}`);
+                        }
+                    }
+                    
+                    result = `Le nombre de diviseurs de ${num} est: ${count}`;
+                    steps.push(`Retourne nb = ${count}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'sommechiffre': {
+                    let num = parseInt(document.getElementById('modal-input-number').value);
+                    if (isNaN(num) || num < 0) {
+                        alert('Veuillez entrer un nombre entier positif');
+                        return;
+                    }
+                    
+                    steps.push('Début de la fonction sommechiffre');
+                    steps.push('S = 0');
+                    
+                    let sum = 0;
+                    let originalNum = num;
+                    
+                    do {
+                        const digit = num % 10;
+                        sum += digit;
+                        steps.push(`S = S + N MOD 10 = ${sum - digit} + ${digit} = ${sum}`);
+                        
+                        num = Math.floor(num / 10);
+                        steps.push(`N = N DIV 10 = ${num}`);
+                    } while (num > 0);
+                    
+                    result = `La somme des chiffres de ${originalNum} est: ${sum}`;
+                    steps.push(`Retourne S = ${sum}`);
+                    steps.push('Fin de la fonction');
+                    break;
+                }
+                
+                case 'affichage': {
+                    const array = getModalArrayValues();
+                    
+                    steps.push('Début de la procédure affichage');
+                    let output = '';
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Affichage: V[${i}] = ${array[i]}`);
+                        output += `V[${i}] = ${array[i]}<br>`;
+                    }
+                    
+                    result = output;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'affichage_pairs': {
+                    const array = getModalArrayValues();
+                    
+                    steps.push('Début de la procédure affiche');
+                    let output = '';
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} mod 2 = ${array[i] % 2}`);
+                        if (array[i] % 2 === 0) {
+                            steps.push(`t[${i}] est pair, donc affichage: T[${i}] = ${array[i]}`);
+                            output += `T[${i}] = ${array[i]}<br>`;
+                        } else {
+                            steps.push(`t[${i}] est impair, pas d'affichage`);
+                        }
+                    }
+                    
+                    result = output || 'Aucun élément pair dans le tableau';
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'extraire': {
+                    const array = getModalArrayValues();
+                    
+                    steps.push('Début de la procédure extraire');
+                    steps.push('j = 0, k = 0');
+                    
+                    const evens = [];
+                    const odds = [];
+                    
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si t[${i}] = ${array[i]} mod 2 = ${array[i] % 2}`);
+                        if (array[i] % 2 === 0) {
+                            evens.push(array[i]);
+                            steps.push(`t[${i}] est pair, donc Tp[${evens.length - 1}] = ${array[i]}, j = j + 1 = ${evens.length}`);
+                        } else {
+                            odds.push(array[i]);
+                            steps.push(`t[${i}] est impair, donc Timp[${odds.length - 1}] = ${array[i]}, k = k + 1 = ${odds.length}`);
+                        }
+                    }
+                    
+                    result = `Tableau des éléments pairs (TP): [${evens.join(', ')}]<br>Tableau des éléments impairs (Timp): [${odds.join(', ')}]`;
+                    steps.push(`Tableau TP de taille ${evens.length}: [${evens.join(', ')}]`);
+                    steps.push(`Tableau Timp de taille ${odds.length}: [${odds.join(', ')}]`);
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'insertion': {
+                    const array = getModalArrayValues();
+                    const position = parseInt(document.getElementById('modal-insert-position').value);
+                    const value = parseInt(document.getElementById('modal-insert-value').value);
+                    
+                    if (isNaN(position) || position < 0 || position > array.length) {
+                        alert(`La position doit être entre 0 et ${array.length}`);
+                        return;
+                    }
+                    
+                    if (isNaN(value)) {
+                        alert('Veuillez entrer une valeur à insérer valide');
+                        return;
+                    }
+                    
+                    steps.push('Début de la procédure insertion');
+                    
+                    const result_array = [...array];
+                    // Push a placeholder to increase array size
+                    result_array.push(null);
+                    
+                    for (let i = result_array.length - 1; i > position; i--) {
+                        result_array[i] = result_array[i - 1];
+                        steps.push(`t[${i}] = t[${i-1}] = ${result_array[i]}`);
+                    }
+                    
+                    result_array[position] = value;
+                    steps.push(`t[${position}] = ${value}`);
+                    
+                    result = `Tableau après insertion: [${result_array.join(', ')}]`;
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                case 'remplir_lettresonly': {
+                    // Get values from the modal array inputs as strings
+                    const size = parseInt(document.getElementById('modal-array-size').value);
+                    const array = [];
+                    
+                    for (let i = 0; i < size; i++) {
+                        const element = document.getElementById(`modal-array-element-${i}`);
+                        if (element) {
+                            array.push(element.value.toString());
+                        }
+                    }
+                    
+                    steps.push('Début de la procédure remplir');
+                    
+                    // Helper function to check if a string contains only letters
+                    const containsOnlyLetters = str => /^[A-Za-z]+$/.test(str);
+                    
+                    let allLetters = true;
+                    for (let i = 0; i < array.length; i++) {
+                        steps.push(`Vérification si verif(t[${i}]) = verif("${array[i]}")`);
+                        
+                        if (containsOnlyLetters(array[i])) {
+                            steps.push(`"${array[i]}" ne contient que des lettres, accepté`);
+                        } else {
+                            allLetters = false;
+                            steps.push(`"${array[i]}" contient des caractères non alphabétiques, nécessite une nouvelle saisie`);
+                        }
+                    }
+                    
+                    result = allLetters ? 
+                        `Tableau rempli avec des chaînes alphabétiques: [${array.join(', ')}]` : 
+                        `Certaines valeurs contiennent des caractères non alphabétiques, veuillez refaire la saisie`;
+                    
+                    steps.push('Fin de la procédure');
+                    break;
+                }
+                
+                default:
+                    result = `L'algorithme "${algoKey}" sera implémenté prochainement.`;
+            }
+            
+            // Display results with animation
+            if (result) {
+                // Handle HTML content in result
+                if (result.includes('<br>')) {
+                    resultContent.innerHTML = result;
+                } else {
+                    resultContent.textContent = result;
+                }
+                
+                executionSteps.innerHTML = steps.map(step => 
+                    `<div class="execution-step">${step}</div>`
+                ).join('');
+                
+                // Fade in results
+                resultsSection.style.opacity = '0';
+                resultsSection.classList.remove('hidden');
+                setTimeout(() => {
+                    resultsSection.style.transition = 'opacity 0.3s ease-in-out';
+                    resultsSection.style.opacity = '1';
+                    
+                    // Ensure scrolling works by setting explicit styles
+                    executionSteps.style.overflowY = 'auto';
+                    executionSteps.style.maxHeight = '400px';
+                    executionSteps.style.display = 'block';
+                    
+                    // Scroll to the top of the execution steps
+                    executionSteps.scrollTop = 0;
+                    
+                    // Ensure modal execution steps also have proper scrolling
+                    const modalExecutionSteps = document.getElementById('modal-execution-steps');
+                    if (modalExecutionSteps) {
+                        modalExecutionSteps.style.overflowY = 'auto';
+                        modalExecutionSteps.style.maxHeight = '400px';
+                        modalExecutionSteps.style.display = 'block';
+                        modalExecutionSteps.scrollTop = 0;
+                    }
+                }, 0);
+            }
+        }
+
+        // Initialize the application
+        function init() {
+            generateAlgorithmCards();
+            setupEventListeners();
+            
+            // Add CSS for line clamping
+            const style = document.createElement('style');
+            style.textContent = `
+                .line-clamp-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                
+                /* Prevent scrolling when modal is open */
+                body.modal-open {
+                    overflow: hidden;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Ensure execution steps can be scrolled
+            document.addEventListener('DOMContentLoaded', function() {
+                const executionStepsElements = document.querySelectorAll('#execution-steps, #modal-execution-steps');
+                executionStepsElements.forEach(element => {
+                    if (element) {
+                        // Make sure scroll events aren't prevented
+                        element.addEventListener('wheel', function(e) {
+                            e.stopPropagation();
+                        });
+                    }
+                });
+                
+                // Enable window scrolling when content exceeds viewport
+                function checkForScroll() {
+                    if (document.body.scrollHeight > window.innerHeight) {
+                        document.documentElement.style.overflowY = 'auto';
+                        document.body.style.overflowY = 'auto';
+                    }
+                }
+                
+                // Check on page load
+                checkForScroll();
+                
+                // Check after results are shown
+                executeButton.addEventListener('click', function() {
+                    // Wait for results to render
+                    setTimeout(checkForScroll, 500);
+                });
+                
+                // Listen for window resize
+                window.addEventListener('resize', checkForScroll);
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
