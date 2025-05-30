@@ -1,0 +1,154 @@
+{
+    "algorithms": {
+        "remplir": {
+            "title": "Remplissage d'un tableau",
+            "pseudocode": "Procédure remplir (@v:tab;m:entier)\nDébut\n    Pour i de 0 à n-1 faire\n        Ecrire (\"v[\",i,\"] = \");\n        Lire (v[i])\n    Fin pour\nfin",
+            "description": "Cette procédure permet de remplir un tableau avec des valeurs saisies par l'utilisateur."
+        },
+        "recherche": {
+            "title": "Recherche d'un élément dans un tableau",
+            "pseudocode": "fonction recherche(T:tab, n,x: entier):booléen\nDébut\n    i ← 0, trouve ← Faux\n    tant que (i<n) et (trouve==Faux) faire\n        si v[i]=y alors\n            trouve ← Vrai\n        sinon\n            i ← i+1\n        finsi\n    fin tant que\n    retourner(trouve)\nfin",
+            "description": "Cette fonction recherche un élément x dans un tableau T de n éléments et retourne vrai si l'élément est trouvé, faux sinon."
+        },
+        "recherche_sequentielle": {
+            "title": "La recherche séquentielle",
+            "pseudocode": "fonction recherche(t:tab,x,n:entier):booléen\ndébut\n      trouve<--faux\n      i<--0\n      répéter\n            Si t[i]=x alors\n                 trouve<--vrai\n            Sinon\n                i<--i+1\n            Fin si\n       jusqu'à(i>n-1 ou trouve=vrai)\n       retourner trouve",
+            "description": "Cette fonction effectue une recherche séquentielle d'une valeur x dans un tableau t de taille n. Elle retourne vrai si x est trouvé, sinon faux."
+        },
+        "maximum": {
+            "title": "Maximum d'un tableau",
+            "pseudocode": "Fonction Maximum(t:tab;n:entier) : entier\nDébut\n    Max ← t[0]\n    Pour i de 1 à n-1 faire\n        Si t[i] > Max alors\n            Max ← t[i]\n        Finsi\n    Fin pour\n    Retourner(Max)\nFin",
+            "description": "Cette fonction retourne la valeur maximale présente dans un tableau d'entiers."
+        },
+        "somme": {
+            "title": "Somme des éléments d'un tableau",
+            "pseudocode": "fonction somme(t:tab;n:entier) : entier\nDebut\n    S ← 0\n    Pour i de 0 à n-1 faire\n        S ← S + t[i]\n    Fin pour\n    Retourner S\nFin",
+            "description": "Cette fonction calcule la somme de tous les éléments d'un tableau d'entiers."
+        },
+        "sommediv": {
+            "title": "Somme des diviseurs d'un entier",
+            "pseudocode": "fonction sommediv(x:entier) : entier\nDébut\n    S ← 0\n    Pour i de 1 à x faire\n        Si x mod i=0 alors\n            S ← S + i\n        FinSi\n    Fin pour\n    Retourner S\nFin",
+            "description": "Cette fonction calcule la somme de tous les diviseurs d'un nombre entier."
+        },
+        "pgcd": {
+            "title": "PGCD de deux entiers",
+            "pseudocode": "Fonction pgcd(a,b:entier):entier\ndébut\n    Tantque (a≠b) faire\n        si(a>b)alors\n            a ← a-b\n        sinon\n            b ← b-a\n        finsi\n    fin tantque\n    retourner(a)\nfin",
+            "description": "Cette fonction calcule le plus grand commun diviseur (PGCD) de deux nombres entiers."
+        },
+        "ppcm": {
+            "title": "PPCM de deux entiers",
+            "pseudocode": "Fonction ppcm(a,b:entier):entier\nDébut\n    x ← a\n    Tantque (x mod b≠0) faire\n        x ← x+a\n    fin tantque\n    retourner(x)\nfin",
+            "description": "Cette fonction calcule le plus petit commun multiple (PPCM) de deux nombres entiers."
+        },
+        "tri_selection": {
+            "title": "Tri par sélection",
+            "pseudocode": "Procédure TriParSélection (@T : Tab , n : entier)\nDébut\n    Pour i de 0 à n-1 faire\n        pmin ← i\n        Pour j de i+1 à n faire\n            Si T[j] < T[pmin] Alors\n                pmin ← j\n            fin si\n        Fin pour\n        Si (t[i] ≠ t[pmin]) alors\n            temp ← T[i]\n            T[i] ← T[pmin]\n            T[pmin] ← temp\n        Fin Si\n    Fin pour\nFin",
+            "description": "Cette procédure trie un tableau par la méthode de sélection en recherchant le minimum dans la partie non triée et en l'échangeant avec l'élément courant."
+        },
+        "tri_insertion": {
+            "title": "Tri par insertion",
+            "pseudocode": "Procédure TriParInsertion (@T : TAB ; n : entier)\nDébut\n    Pour i de 1 à n-1 Faire\n        Tmp ← T[i]\n        j ← i - 1\n        TantQue ( ( T[j] > Tmp ) ET ( j >= 0 ) ) faire\n            T[j+1] ← T[j]\n            j ← j-1\n        FinTantQue\n        T[j+1] ← Tmp\n    Fin Pour\nFin",
+            "description": "Cette procédure trie un tableau par la méthode d'insertion en insérant chaque élément à la bonne position dans la partie déjà triée."
+        },
+        "tri_bulle": {
+            "title": "Tri à bulle",
+            "pseudocode": "Procédure Tri_A_Bulle (@T : Tab ; n : entier)\nDébut\n    Répéter\n        Permut ← Faux\n        Pour i de 0 à n-2 Faire\n            Si T[i] > T[i+1] alors \n                Aux ← T[i]\n                T[i] ← T[i+1]\n                T[i+1] ← Aux \n                Permut ← Vrai\n            Fin si\n        Fin Pour\n    Jusqu'à (permut = Faux)\nFin",
+            "description": "Cette procédure trie un tableau par la méthode de tri à bulle en comparant et échangeant des éléments adjacents jusqu'à ce que le tableau soit trié."
+        },
+        "saisir_controle": {
+            "title": "Saisie avec contrôle",
+            "pseudocode": "Procédure saisir (@m:entier)\nDébut\n    Répéter\n        Ecrire (\"m=\"); Lire(m)\n    Jusqu'à (m dans[5..10]);\nFin",
+            "description": "Cette procédure permet de saisir un entier avec une validation pour s'assurer qu'il est compris entre 5 et 10."
+        },
+        "remplir_simple": {
+            "title": "Remplissage simple",
+            "pseudocode": "Procédure remplir (@v:tab; m:entier)\nDébut\n    Pour i de 0 à n-1 faire\n        Ecrire (\"v[\",i,\"] = \");\n        Lire (v[i])\n    Fin pour\nfin",
+            "description": "Cette procédure permet de remplir un tableau sans contrôle de saisie."
+        },
+        "remplir_positif": {
+            "title": "Remplissage positif",
+            "pseudocode": "Procédure remplir (@t:tab; n:entier)\nDébut\n    Pour i de 1 à n-1 faire\n        Répéter\n            Ecrire (\"t[\",i,\"] = \");\n            Lire (t[i])\n        Jusqu'à (t[i]>0)\n    Fin Pour\nFin",
+            "description": "Cette procédure remplit un tableau avec des entiers positifs uniquement (>0)."
+        },
+        "remplir_aleatoire": {
+            "title": "Remplissage aléatoire",
+            "pseudocode": "Procédure remplir (@t:tab; n:entier)\nDébut\n    Pour i de 1 à n-1 faire\n        t[i] ← aléa(10,90)\n    fin pour\nFin",
+            "description": "Cette procédure remplit un tableau avec des nombres aléatoires entre 10 et 90."
+        },
+        "remplir_lettres": {
+            "title": "Remplissage lettres",
+            "pseudocode": "Procédure remplir (@t:tab; n:entier)\nDébut\n    Pour i de 1 à n-1 faire\n        t[i] ← chr(aléa(ord('A'), ord('Z')))\n    Fin pour\nfin",
+            "description": "Cette procédure remplit un tableau avec des lettres majuscules aléatoires."
+        },
+        "remplir_ordre": {
+            "title": "Remplissage en ordre",
+            "pseudocode": "Procédure remplir (@t:tab; n:entier)\nDébut\n    Ecrire (\"T[\",0,\"] = \"); Lire (t[0])\n    Pour i de 1 à n-1 faire\n        Répéter\n            Ecrire (\"t[\",i,\"] = \");\n            Lire (t[i])\n        Jusqu'à (t[i]>t[i-1])\n    Fin Pour\nFin",
+            "description": "Cette procédure remplit un tableau de façon à ce que chaque élément soit supérieur au précédent."
+        },
+        "remplir_deuxchiffres": {
+            "title": "Remplissage à deux chiffres",
+            "pseudocode": "Procédure remplir (@t:tab; n:entier)\nDébut\n    Pour i de 1 à n-1 faire\n        Répéter\n            Ecrire (\"t[\",i,\"] = \");\n            Lire (t[i])\n        Jusqu'à (10<=t[i]<=99)\n    Fin Pour\nFin",
+            "description": "Cette procédure remplit un tableau avec des entiers à deux chiffres (entre 10 et 99)."
+        },
+        "remplir_distinct": {
+            "title": "Remplissage distinct",
+            "pseudocode": "Procédure remplir (@t:tab; n:entier)\nDébut\n    Pour i de 1 à n-1 faire\n        Répéter\n            Ecrire (\"t[\",i,\"] = \");\n            Lire (t[i])\n        Jusqu'à (recherche(t,i,t[i])=faux)\n    Fin Pour\nFin",
+            "description": "Cette procédure remplit un tableau avec des valeurs distinctes, en vérifiant que chaque nouvelle valeur n'est pas déjà présente."
+        },
+        "remplir_lettresonly": {
+            "title": "Remplissage lettres uniquement",
+            "pseudocode": "Procédure remplir (@t:tab; n:entier)\nDébut\n    Pour i de 1 à n-1 faire\n        Répéter\n            Ecrire (\"t[\",i,\"] = \");\n            Lire (t[i])\n        Jusqu'à (verif(t[i])=vrai)\n    Fin Pour\nFin",
+            "description": "Cette procédure remplit un tableau avec des chaînes contenant uniquement des lettres alphabétiques."
+        },
+        "nbocc": {
+            "title": "Nombre d'occurrences",
+            "pseudocode": "Fonction nbocc(t:tab, n, x:entier):entier\nDébut\n    nb ← 0\n    Pour i de 0 à n-1 faire\n        Si t[i]=x alors\n            nb ← nb+1\n        fin si\n    fin pour\n    retourner(nb)\nfin",
+            "description": "Cette fonction compte le nombre d'occurrences d'une valeur x dans un tableau T."
+        },
+        "verif_lettres": {
+            "title": "Vérification lettres",
+            "pseudocode": "fonction verif(ch:chaine):booléen\nDébut\n    i ← 0, test ← vrai\n    tant que (i< long(ch))et (test==vrai) faire\n        si ('A'< majus(ch[i])< 'Z') alors\n            i ← i+1\n        sinon\n            test ← Faux\n        finsi\n    fin tantque\n    retourner(test)\nfin",
+            "description": "Cette fonction vérifie si une chaîne ne contient que des lettres alphabétiques."
+        },
+        "inverse": {
+            "title": "Inverse d'une chaîne",
+            "pseudocode": "Fonction inverse(ch:chaine):chaine\nDébut\n    ch1 ← ''\n    Pour i de 0 à long(ch)-1 faire\n        ch1 ← ch[i]+ch1\n    Fin pour\n    retourner(ch1)\nfin",
+            "description": "Cette fonction renvoie l'inverse d'une chaîne de caractères."
+        },
+        "nbdiv": {
+            "title": "Nombre de diviseurs",
+            "pseudocode": "Fonction nbdiv(x:entier):entier\nDébut\n    nb ← 0\n    Pour i de 1 à x faire\n        Si x mod i=0 alors\n            nb ← nb + 1\n        FinSi\n    Fin pour\n    Retourner nb\nFin",
+            "description": "Cette fonction calcule le nombre de diviseurs d'un entier x."
+        },
+        "sommechiffre": {
+            "title": "Somme des chiffres",
+            "pseudocode": "Fonction sommechiffre(N:entier):entier\ndébut\n    S ← 0\n    Répéter\n        S ← S + N MOD 10\n        N ← N DIV 10\n    Jusqu'à N = 0\n    Retourner(S)\nfin",
+            "description": "Cette fonction calcule la somme des chiffres d'un nombre entier."
+        },
+        "affichage": {
+            "title": "Affichage tableau",
+            "pseudocode": "Procédure affichage(v:tab; n:entier)\nDébut\n    Pour i de 0 à n-1 faire\n        Ecrire (\"V[\",i,\"] = \",v[i]);\n    Finpour\nfin",
+            "description": "Cette procédure affiche tous les éléments d'un tableau."
+        },
+        "affichage_pairs": {
+            "title": "Affichage pairs",
+            "pseudocode": "Procédure affiche(t:tab; n:entier)\nDébut\n    Pour i de 0 à n-1 faire\n        si t[i] mod 2 = 0 alors\n            Ecrire (\"T[\",i,\"] = \",t[i]);\n        finsi\n    Fin pour\nFin",
+            "description": "Cette procédure affiche uniquement les éléments pairs d'un tableau."
+        },
+        "extraire": {
+            "title": "Extraire pairs/impairs",
+            "pseudocode": "Procédure extraire(t,@TP,@Timp:tab; n,@j,@k:entier)\nDébut\n    j ← 0, k ← 0\n    Pour i de 0 à n-1 faire\n        Si(t[i] mod 2 = 0) alors\n            Tp[j] ← t[i],\n            j ← j+1\n        Sinon\n            Timp[k] ← t[i]\n            k ← k+1\n        Finsi\n    Fin pour\nFin",
+            "description": "Cette procédure extrait à partir d'un tableau T les éléments pairs dans Tp et impairs dans Timp."
+        },
+        "insertion": {
+            "title": "Insertion élément",
+            "pseudocode": "Procédure insertion(@v:tab; n,x,p:entier):\nDébut\n    Pour i de n à p+1 (pas= -1) faire \n        t[i] = t[i-1]\n    fin pour\n    t[p] = x\nfin",
+            "description": "Cette procédure insère un élément x dans un tableau T à une position p."
+        },
+        "recherche_dichotomique": {
+            "title": "La recherche dichotomique",
+            "pseudocode": "Fonction Recherche (T: Tab, n:entier, X: entier) : Booléen\nDébut\n      d←0\n      f←n-1\n      trouve←faux\n      Tant Que (Trouve=faux Et (d ≤ f) Faire\n             Mil← (f+d) div 2\n             Si (T[Mil]=X) Alors\n                     Trouve←Vrai\n             Sinon si (T[Mil] < X) Alors\n                      d←Mil+1\n             Sinon\n                      f←Mil-1\n             FinSi\n      Fin Tant que\n      Retourner Trouve\nFin",
+            "description": "Cette fonction effectue une recherche dichotomique (binaire) d'une valeur X dans un tableau T trié de taille n. Elle retourne vrai si X est trouvé, sinon faux."
+        }
+    }
+}
