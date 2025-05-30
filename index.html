@@ -368,6 +368,9 @@ const executionSteps = document.getElementById('execution-steps');
 // Global variable to store algorithms
 let algorithms = {};
 
+// Load algorithms when the page loads
+document.addEventListener('DOMContentLoaded', fetchAlgorithms);
+
 // Fetch algorithm data from algo.json
 async function fetchAlgorithms() {
     try {
@@ -375,12 +378,14 @@ async function fetchAlgorithms() {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        algorithms = await response.json();
+        const data = await response.json();
+        algorithms = data.algorithms; // ✅ Access the correct nested object
         generateAlgorithmCards();
     } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
     }
 }
+
 
 // Generate algorithm cards
 function generateAlgorithmCards() {
