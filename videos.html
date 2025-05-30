@@ -9,6 +9,13 @@
     .gradient-bg {
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     }
+
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -29,6 +36,24 @@
   </header>
 
   <main class="container mx-auto p-6">
+    <!-- Search input -->
+    <div class="card p-6 mb-8">
+      <div class="mb-4">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <input id="search-videos" type="text" placeholder="Rechercher une vidéo..." 
+                 class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div id="search-stats" class="text-sm text-gray-500 mt-2 hidden">
+          <span id="result-count">0</span> résultat(s) trouvé(s)
+        </div>
+      </div>
+    </div>
+
     <div id="videos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Video Cards will be injected here -->
     </div>
@@ -55,13 +80,33 @@
       });
 
     // Function to render videos for the current page
+    function filterVideos(searchTerm) {
+      return videosData.filter(video => {
+        const searchString = `${video.title} ${video.description}`.toLowerCase();
+        return searchString.includes(searchTerm.toLowerCase());
+      });
+    }
+
     function renderVideos() {
       const container = document.getElementById('videos-container');
       container.innerHTML = ''; // Clear previous videos
 
+      const searchTerm = document.getElementById('search-videos').value;
+      const filteredVideos = searchTerm ? filterVideos(searchTerm) : videosData;
+
+      // Update search stats
+      const searchStats = document.getElementById('search-stats');
+      const resultCount = document.getElementById('result-count');
+      if (searchTerm) {
+        searchStats.classList.remove('hidden');
+        resultCount.textContent = filteredVideos.length;
+      } else {
+        searchStats.classList.add('hidden');
+      }
+
       const start = (currentPage - 1) * videosPerPage;
       const end = start + videosPerPage;
-      const videosToDisplay = videosData.slice(start, end);
+      const videosToDisplay = filteredVideos.slice(start, end);
 
       videosToDisplay.forEach(video => {
         const videoId = new URL(video.link).searchParams.get('v');
@@ -90,6 +135,13 @@
         container.appendChild(videoCard);
       });
     }
+
+    // Add search event listener
+    document.getElementById('search-videos').addEventListener('input', (e) => {
+      currentPage = 1; // Reset to first page when searching
+      renderVideos();
+      renderPagination();
+    });
 
     // Function to render pagination controls
     function renderPagination() {
