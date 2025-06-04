@@ -12,7 +12,7 @@
         },
         "recherche_sequentielle": {
             "title": "La recherche séquentielle",
-            "pseudocode": "fonction recherche(t:tab,x,n:entier):booléen\ndébut\n      trouve<--faux\n      i<--0\n      répéter\n            Si t[i]=x alors\n                 trouve<--vrai\n            Sinon\n                i<--i+1\n            Fin si\n       jusqu'à(i>n-1 ou trouve=vrai)\n       retourner trouve",
+            "pseudocode": "fonction recherche(t:tab,x,n:entier):booléen\ndébut\n      trouve←faux\n      i←0\n      répéter\n            Si t[i]=x alors\n                 trouve←vrai\n            Sinon\n                i←i+1\n            Fin si\n       jusqu'à(i>n-1 ou trouve=vrai)\n       retourner trouve",
             "description": "Cette fonction effectue une recherche séquentielle d'une valeur x dans un tableau t de taille n. Elle retourne vrai si x est trouvé, sinon faux."
         },
         "maximum": {
