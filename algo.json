@@ -7,7 +7,7 @@
         },
         "recherche": {
             "title": "Recherche d'un élément dans un tableau",
-            "pseudocode": "fonction recherche(T:tab, n,x: entier):booléen\nDébut\n    i ← 0, trouve ← Faux\n    tant que (i < n) et (trouve==Faux) faire\n        si v[i]=y alors\n            trouve ← Vrai\n        sinon\n            i ← i+1\n        finsi\n    fin tant que\n    retourner(trouve)\nfin",
+            "pseudocode": "fonction recherche(T:tab, n,x: entier):booléen\nDébut\n    i ← 0, trouve ← Faux\n    tant que (i &lt; n) et (trouve==Faux) faire\n        si v[i]=y alors\n            trouve ← Vrai\n        sinon\n            i ← i+1\n        finsi\n    fin tant que\n    retourner(trouve)\nfin",
             "description": "Cette fonction recherche un élément x dans un tableau T de n éléments et retourne vrai si l'élément est trouvé, faux sinon."
         },
         "recherche_sequentielle": {
