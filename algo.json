@@ -7,7 +7,7 @@
         },
         "recherche": {
             "title": "Recherche d'un élément dans un tableau",
-            "pseudocode": "fonction recherche(T:tab, n,x: entier):booléen\nDébut\n    i ← 0, trouve ← Faux\n    tant que (i &lt; n) et (trouve==Faux) faire\n        si v[i]=y alors\n            trouve ← Vrai\n        sinon\n            i ← i+1\n        finsi\n    fin tant que\n    retourner(trouve)\nfin",
+            "pseudocode": "fonction recherche(T:tab, n,x: entier):booléen\nDébut\n    i ← 0, trouve ← Faux\n    tant que (i &lt; n) et (trouve=Faux) faire\n        si v[i]=y alors\n            trouve ← Vrai\n        sinon\n            i ← i+1\n        finsi\n    fin tant que\n    retourner(trouve)\nfin",
             "description": "Cette fonction recherche un élément x dans un tableau T de n éléments et retourne vrai si l'élément est trouvé, faux sinon."
         },
         "recherche_sequentielle": {
@@ -107,7 +107,7 @@
         },
         "verif_lettres": {
             "title": "Vérification lettres",
-            "pseudocode": "fonction verif(ch:chaine):booléen\nDébut\n    i ← 0, test ← vrai\n    tant que (i< long(ch))et (test==vrai) faire\n        si ('A'< majus(ch[i])< 'Z') alors\n            i ← i+1\n        sinon\n            test ← Faux\n        finsi\n    fin tantque\n    retourner(test)\nfin",
+            "pseudocode": "fonction verif(ch:chaine):booléen\nDébut\n    i ← 0, test ← vrai\n    tant que (i< long(ch))et (test=vrai) faire\n        si ('A'< majus(ch[i])< 'Z') alors\n            i ← i+1\n        sinon\n            test ← Faux\n        finsi\n    fin tantque\n    retourner(test)\nfin",
             "description": "Cette fonction vérifie si une chaîne ne contient que des lettres alphabétiques."
         },
         "inverse": {
